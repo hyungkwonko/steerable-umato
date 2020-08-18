@@ -1,8 +1,7 @@
 <script>
 	import { slide } from 'svelte/transition';
-
-	let w;
-	let h;
+	import Linechart from "./Linechart.svelte";
+	import Barchart from "./Barchart.svelte";
 
 	let globalAlpha = 0.1;
 	let hubNum = 100;
@@ -22,15 +21,31 @@
 	let items = [];
 	let i = items.length;
 
+	let settingAssure = false;
+
 
 	function handleClickGlobal() {
 		globalCliked = !globalCliked;
 	}
 
 	function handleClickLocal() {
+		if (settingAssure) {
+			localCliked = !localCliked;
+		} else {
+			alert("Pleaes check the optimization setting")
+		}
+	}
+
+	function handleSettingAssure() {
+		settingAssure = true;
+		alert("Now you can go with local optimization!")
+	}
+
+	function handleSettingStopAssure() {
+		settingAssure = false;
 		localCliked = !localCliked;
 	}
-	
+
 	function containsObject(items, feed) {
 		let keys = Object.keys(feed)
 		for (let i=0; i<items.length; i++) {
@@ -128,9 +143,22 @@
 		border-spacing: 2px;
 	}
 
-	.sub-title button {
+	.button1 {
+		background-color: lightgreen;
+	}
+
+	.button2 {
+		background-color: lightpink;
 		border: 1px solid black;
 		width: 100%;
+	}
+
+	.sub-title-h3 {
+		border: 1px solid black;
+		border-radius: 2px;
+		background-color: black;
+		color: #eee;
+		padding: 15px;
 	}
 
 	.sub-footer {
@@ -150,7 +178,6 @@
 	}
 
 	footer {
-		
 		padding: 40px;
 		text-align: center;
 	}
@@ -164,12 +191,15 @@
 		margin: 40px 10px;
 	}
 	button {
+		border: 1px solid black;
+		border-radius: 2px;
+		width: 100%;
 		transition: all .15s linear;
 		cursor: pointer;
 	}
 	
 	button:hover {
-		background-color: #cecece;
+		background-color: wheat;
 	}
 
 	button:active {
@@ -191,13 +221,13 @@
 		<div class="column">
 			<div class="sub-title">
 				{#if globalCliked}
-					<button on:click={handleClickGlobal} style="background: lightpink">
+					<button on:click={handleClickGlobal} class="button2">
 						<h3>
 							Hyperparameter setting for GLOBAL optimization (Click for STOP 🟥)
 						</h3>
 					</button>
 				{:else}
-					<button on:click={handleClickGlobal} style="background: lightgreen">
+					<button on:click={handleClickGlobal} class="button1">
 						<h3>
 							Hyperparameter setting for GLOBAL optimization (Click for RUN 🟢)
 						</h3>
@@ -268,7 +298,7 @@
 				<button on:click={saveGlobalSnapshot}>
 					Save snapshot
 				</button>
-				<button on:click={saveGlobalSnapshot}>
+				<button on:click={handleSettingAssure}>
 					Use this setting for LOCAL optimization
 				</button>
 			</div>
@@ -278,13 +308,17 @@
 		<div class="column">
 			<div class="sub-title">
 				{#if localCliked}
-					<button on:click={handleClickLocal} style="background: lightpink">
+					<button on:click={handleSettingStopAssure} class="button2">
 						<h3>
 							Hyperparameter setting for LOCAL optimization (Click for STOP 🟥)
 						</h3>
 					</button>
+					<!-- {#if finishedLocalOptimization}
+					function ~
+					localCliked = false
+					{/if} -->
 				{:else}
-					<button on:click={handleClickLocal} style="background: lightgreen">
+					<button on:click={handleClickLocal} class="button1">
 						<h3>
 							Hyperparameter setting for LOCAL optimization (Click for RUN 🟢)
 						</h3>
@@ -353,11 +387,11 @@
 	</div>
 
 	<div>
-		<!-- D3 charts -->
+		<!-- Result charts -->
 		<div class="column">
 			<div class="sub-title">
-				<h3>
-					Global optimization D3 Chart
+				<h3 class="sub-title-h3">
+					Global optimization 2D plot
 				</h3>
 			</div>
 			<div class="row">
@@ -370,8 +404,8 @@
 		</div>
 		<div class="column">
 			<div class="sub-title">
-				<h3>
-					Local optimization D3 Chart
+				<h3 class="sub-title-h3">
+					Local optimization 2D plot
 				</h3>
 			</div>
 			<div class="row">
@@ -385,32 +419,28 @@
 	</div>
 
 	<div>
-		<!-- D3 charts -->
+		<!-- Quantitative evaluation -->
 		<div class="column">
 			<div class="sub-title">
-				<h3>
-					Global optimization Result
+				<h3 class="sub-title-h3">
+					Global optimization quantitative result
 				</h3>
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<p>
-						sads
-					</p>
+					<Linechart></Linechart>
 				</div>
 			</div>
 		</div>
 		<div class="column">
 			<div class="sub-title">
-				<h3>
-					Local optimization Result
+				<h3 class="sub-title-h3">
+					Local optimization quantitative result
 				</h3>
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<p>
-						sads
-					</p>
+					<Barchart></Barchart>
 				</div>
 			</div>
 		</div>
@@ -432,7 +462,7 @@
 						</div>
 					{:else}
 						<div class=snapshot transition:slide>
-							{items.indexOf(item)}) type: {item.type}, globalAlpha: {item.globalAlpha}, hubNum: {item.hubNum},
+							{items.indexOf(item)}. type: {item.type}, globalAlpha: {item.globalAlpha}, hubNum: {item.hubNum},
 							topN: {item.topN}, group: {item.group}, localAlpha: {item.localAlpha}, negRate: {item.negRate},
 							numIter: {item.numIter}, repulsionHub: {item.repulsionHub}
 						</div>
@@ -442,6 +472,9 @@
 		</div>
 	</div>
 
+	<div id="my_dataviz"></div>
+	
+	
 	<footer class="copyright">
 		Copyright 2020 Hyung-Kwon Ko
 		<br>
@@ -449,9 +482,6 @@
 	</footer>
 
 </div>
-
-
-
 
 
 <!-- <p>size: {w}px x {h}px</p>
