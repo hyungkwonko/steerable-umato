@@ -6,17 +6,43 @@
 
 <script>
 	import * as d3 from 'd3';
-    import { onMount, beforeUpdate, afterUpdate } from 'svelte'
     import data from './globalresult.json'
+    import { onMount, beforeUpdate, afterUpdate } from 'svelte'
+
+    export let globalClicked = false;
+
+    let counter = 0;
+    let flag = true;
+    let tmpData;
 
     function translate(x, y) {
         return 'translate(' + x + ',' + y + ')'
     }
 
-    console.log(data);
+	onMount(() => {
+    });
+
+    beforeUpdate(() => {
+        if(globalClicked && flag) {
+            flag = false
+            const interval = setInterval(() => {
+                if (counter < 10) counter++;
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+	});
+
+	afterUpdate(() => {
+        tmpData = data.slice(0, counter + 1)
+
+        // remove chart when stopped
+        if(!globalClicked) {
+            counter = 0
+            tmpData = data.slice(0, counter + 1)
+        }
+	});
 
     let measures = ["dtm01", "dtm1", "ce"]
-
 
     let r = 5;
     let textMargin = 7;
@@ -42,9 +68,6 @@
     const yTicks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
     const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     
-    
-    console.log(data[0]);
-
 	$: xScale = d3.scaleLinear()
 		.domain([minX, maxX])
 		.range([margin.left, width - margin.right]);
@@ -54,12 +77,17 @@
         .range([height - margin.bottom, margin.top]);
 
 	$: minX = d3.min(data, d => d.iter);
-	$: maxX = d3.max(data, d => d.iter);
+    $: maxX = d3.max(data, d => d.iter);
+    
+    let path;
+    let path2;
+    let path3;
 
-    $: path = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`).join('L')}`;
-	$: path2 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm1)}`).join('L')}`;
-	$: path3 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.ce)}`).join('L')}`;
-
+    $: if (counter > 0) {
+        path = `M${tmpData.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`).join('L')}`;
+        path2 = `M${tmpData.map(d => `${xScale(d.iter)}, ${yScale(d.dtm1)}`).join('L')}`;
+        path3 = `M${tmpData.map(d => `${xScale(d.iter)}, ${yScale(d.ce)}`).join('L')}`;
+    }
     // $: dot = data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`);
     // $: area = `${path}L${xScale(maxX)},${yScale(0)}L${xScale(minX)},${yScale(0)}Z`;
 
@@ -78,7 +106,6 @@
     }
 
 </script>
-
 <div class="chart" bind:clientWidth={width} bind:clientHeight={height}>
 	<svg>
 		<!-- y axis -->
@@ -102,70 +129,74 @@
 			{/each}
 		</g>
 
-		<!-- line chart -->
-		<!-- <path class="path-area" d={area}></path> -->
-        <path class="path-line path-line-dtm01" d={path}></path>
-        <path class="path-line path-line-dtm1" d={path2}></path>
-        <path class="path-line path-line-ce" d={path3}></path>
-
-        <!-- axis label -->
+        <!-- x axis label -->
         <text x='{(width - margin.left) / 2}' y='{height}' font-size="12px">Iteration #</text>
 
-        <!-- legend -->
-        {#each measures as measure, i}
-            <circle class="circle-line circle-{measure}"
-                r={r}
-                cx='{width - 90}'
-                cy='{17 * (i + 1)}'
-            ></circle>
-            <text x='{width - 70}' y='{19 * (i+1)}' font-size="12px">{measure}</text>
-        {/each}
 
-        <!-- circles -->
-        {#each data as d, i}
-            {#if !hs || i != targetIndex}
-                <circle class="circle-line circle-dtm01"
+        {#if counter > 0}
+    		<!-- line chart -->
+            <path class="path-line path-line-dtm01" d={path}></path>
+            <path class="path-line path-line-dtm1" d={path2}></path>
+            <path class="path-line path-line-ce" d={path3}></path>
+	    	<!-- <path class="path-area" d={area}></path> -->
+
+            <!-- circles -->
+            {#each tmpData as d, i}
+                {#if !hs || i != targetIndex}
+                    <circle class="circle-line circle-dtm01"
+                        r={r}
+                        cx='{xScale(d.iter)}'
+                        cy='{yScale(d.dtm01)}'
+                        on:mouseover={(e) => hoverState(e, d, i)}
+                    ></circle>
+                    <circle class="circle-line circle-dtm1"
+                        r={r}
+                        cx='{xScale(d.iter)}'
+                        cy='{yScale(d.dtm1)}'
+                        on:mouseover={(e) => hoverState(e, d, i)}
+                    ></circle>
+                    <circle class="circle-line circle-ce"
+                        r={r}
+                        cx='{xScale(d.iter)}'
+                        cy='{yScale(d.ce)}'
+                        on:mouseover={(e) => hoverState(e, d, i)}
+                    ></circle>
+                {:else}
+                    <circle class="circle-line circle-dtm01"
+                        r={10}
+                        cx='{xScale(d.iter)}'
+                        cy='{yScale(d.dtm01)}'
+                        on:mouseout={(e) => hoverStateOut(e, d, i)}
+                    ></circle>
+                    <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.dtm01) - textMargin}'>{d.dtm01}</text>
+                    <circle class="circle-line circle-dtm1"
+                        r={10}
+                        cx='{xScale(d.iter)}'
+                        cy='{yScale(d.dtm1)}'
+                        on:mouseout={(e) => hoverStateOut(e, d, i)}
+                    ></circle>
+                    <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.dtm1) - textMargin}'>{d.dtm1}</text>
+                    <circle class="circle-line circle-ce"
+                        r={10}
+                        cx='{xScale(d.iter)}'
+                        cy='{yScale(d.ce)}'
+                        on:mouseout={(e) => hoverStateOut(e, d, i)}
+                    ></circle>
+                    <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.ce) - textMargin}'>{d.ce}</text>
+                {/if}
+            {/each}
+
+            <!-- legend -->
+            {#each measures as measure, i}
+                <circle class="circle-line circle-{measure}"
                     r={r}
-                    cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm01)}'
-                    on:mouseover={(e) => hoverState(e, d, i)}
+                    cx='{width - 90}'
+                    cy='{17 * (i + 1)}'
                 ></circle>
-                <circle class="circle-line circle-dtm1"
-                    r={r}
-                    cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm1)}'
-                    on:mouseover={(e) => hoverState(e, d, i)}
-                ></circle>
-                <circle class="circle-line circle-ce"
-                    r={r}
-                    cx='{xScale(d.iter)}'
-                    cy='{yScale(d.ce)}'
-                    on:mouseover={(e) => hoverState(e, d, i)}
-                ></circle>
-            {:else}
-                <circle class="circle-line circle-dtm01"
-                    r={10}
-                    cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm01)}'
-                    on:mouseout={(e) => hoverStateOut(e, d, i)}
-                ></circle>
-                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.dtm01) - textMargin}'>{d.dtm01}</text>
-                <circle class="circle-line circle-dtm1"
-                    r={10}
-                    cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm1)}'
-                    on:mouseout={(e) => hoverStateOut(e, d, i)}
-                ></circle>
-                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.dtm1) - textMargin}'>{d.dtm1}</text>
-                <circle class="circle-line circle-ce"
-                    r={10}
-                    cx='{xScale(d.iter)}'
-                    cy='{yScale(d.ce)}'
-                    on:mouseout={(e) => hoverStateOut(e, d, i)}
-                ></circle>
-                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.ce) - textMargin}'>{d.ce}</text>
-            {/if}
-        {/each}
+                <text x='{width - 70}' y='{19 * (i+1)}' font-size="12px">{measure}</text>
+            {/each}
+        {/if}
+
 	</svg>
 </div>
 

@@ -1,23 +1,32 @@
+<!-- https://svelte.dev/repl/42ed4a09041e4e39b2f43f798eb898cb?version=3.21.0 -->
+<!-- https://svelte.dev/repl/9a24a35072c64af5b7bfde6c806c43d3?version=3.12.1 -->
+
 <script>
 	import { slide } from 'svelte/transition';
 	import Linechart from "./Linechart.svelte";
 	import Linechart2 from "./Linechart2.svelte";
 	import Scatterplot from "./Scatterplot.svelte";
 	import Scatterplot2 from "./Scatterplot2.svelte";
+	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
+
+
+	beforeUpdate(() => {
+	});
+
+	afterUpdate(() => {
+	});
 
 	let globalAlpha = 0.1;
 	let hubNum = 100;
 	let topN = 30;
 	let group = "PCA";
-	let globalCliked = false;
+	let globalClicked = false;
 
 	let localAlpha = 0.1;
 	let negRate = 5.0;
 	let numIter = 50;
 	let repulsionHub = 0.01
-	let localCliked = false;
-
-	let text = 'edit me';
+	let localClicked = false;
 
 	let showItems = false;
 	let items = [];
@@ -25,14 +34,13 @@
 
 	let settingAssure = false;
 
-
 	function handleClickGlobal() {
-		globalCliked = !globalCliked;
+		globalClicked = !globalClicked;
 	}
 
 	function handleClickLocal() {
 		if (settingAssure) {
-			localCliked = !localCliked;
+			localClicked = !localClicked;
 		} else {
 			alert("Pleaes check the optimization setting")
 		}
@@ -45,7 +53,7 @@
 
 	function handleSettingStopAssure() {
 		settingAssure = false;
-		localCliked = !localCliked;
+		localClicked = !localClicked;
 	}
 
 	function containsObject(items, feed) {
@@ -88,7 +96,6 @@
 			console.log("already in it");
 		}
 	}
-
 </script>
 
 <style>
@@ -222,7 +229,7 @@
 		<!-- Global -->
 		<div class="column">
 			<div class="sub-title">
-				{#if globalCliked}
+				{#if globalClicked}
 					<button on:click={handleClickGlobal} class="button2">
 						<h3>
 							Hyperparameter setting for GLOBAL optimization (Click for STOP 🟥)
@@ -309,7 +316,7 @@
 		<!-- LOCAL -->
 		<div class="column">
 			<div class="sub-title">
-				{#if localCliked}
+				{#if localClicked}
 					<button on:click={handleSettingStopAssure} class="button2">
 						<h3>
 							Hyperparameter setting for LOCAL optimization (Click for STOP 🟥)
@@ -317,7 +324,7 @@
 					</button>
 					<!-- {#if finishedLocalOptimization}
 					function ~
-					localCliked = false
+					localClicked = false
 					{/if} -->
 				{:else}
 					<button on:click={handleClickLocal} class="button1">
@@ -388,8 +395,8 @@
 		</div>
 	</div>
 
+	<!-- Result charts -->
 	<div>
-		<!-- Result charts -->
 		<div class="column">
 			<div class="sub-title">
 				<h3 class="sub-title-h3">
@@ -416,8 +423,8 @@
 		</div>
 	</div>
 
+	<!-- Quantitative evaluation -->
 	<div>
-		<!-- Quantitative evaluation -->
 		<div class="column">
 			<div class="sub-title">
 				<h3 class="sub-title-h3">
@@ -426,7 +433,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<Linechart></Linechart>
+					<Linechart globalClicked={globalClicked}></Linechart>
 				</div>
 			</div>
 		</div>
@@ -438,7 +445,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<Linechart2></Linechart2>
+					<Linechart2 localClicked={localClicked}></Linechart2>
 				</div>
 			</div>
 		</div>
@@ -471,7 +478,6 @@
 	</div>
 
 	<div id="my_dataviz"></div>
-	
 	
 	<footer class="copyright">
 		Copyright 2020 Hyung-Kwon Ko
