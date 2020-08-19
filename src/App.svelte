@@ -405,7 +405,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<Scatterplot></Scatterplot>
+					<Scatterplot globalClicked={globalClicked}></Scatterplot>
 				</div>
 			</div>
 		</div>

@@ -23,6 +23,9 @@
     });
 
     beforeUpdate(() => {
+    });
+    
+	afterUpdate(() => {
         if(globalClicked && flag) {
             flag = false
             const interval = setInterval(() => {
@@ -30,9 +33,7 @@
             }, 1000);
             return () => clearInterval(interval);
         }
-	});
 
-	afterUpdate(() => {
         tmpData = data.slice(0, counter + 1)
 
         // remove chart when stopped

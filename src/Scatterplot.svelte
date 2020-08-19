@@ -17,7 +17,7 @@
         return csvData
     }
 
-    let data = read_csv("umato-small.csv")
+    let data = read_csv("umato-small_0.csv")
 
     let el;
 
