@@ -1,4 +1,6 @@
 <!-- https://svelte.dev/examples#scatterplot -->
+<!-- https://svelte.recipes/components/scatterplot/ -->
+
 <script>
 	import * as d3 from 'd3';
 
