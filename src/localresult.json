@@ -1,0 +1,122 @@
+[
+    {
+        "iter": 0,
+        "mrre": 0.45,
+        "continuity": 0.44,
+        "trust": 0.29
+    },
+    {
+        "iter": 1,
+        "mrre": 0.47,
+        "continuity": 0.63,
+        "trust": 0.60
+    },
+    {
+        "iter": 2,
+        "mrre": 0.47,
+        "continuity": 0.66,
+        "trust": 0.69
+    },
+    {
+        "iter": 3,
+        "mrre": 0.40,
+        "continuity": 0.70,
+        "trust": 0.59
+    },
+    {
+        "iter": 4,
+        "mrre": 0.59,
+        "continuity": 0.71,
+        "trust": 0.60
+    },
+    {
+        "iter": 5,
+        "mrre": 0.60,
+        "continuity": 0.59,
+        "trust": 0.62
+    },
+    {
+        "iter": 6,
+        "mrre": 0.60,
+        "continuity": 0.73,
+        "trust": 0.66
+    },
+    {
+        "iter": 7,
+        "mrre": 0.60,
+        "continuity": 0.69,
+        "trust": 0.66
+    },
+    {
+        "iter": 8,
+        "mrre": 0.60,
+        "continuity": 0.73,
+        "trust": 0.80
+    },
+    {
+        "iter": 9,
+        "mrre": 0.59,
+        "continuity": 0.73,
+        "trust": 0.89
+    },
+    {
+        "iter": 10,
+        "mrre": 0.60,
+        "continuity": 0.73,
+        "trust": 0.91
+    },
+    {
+        "iter": 11,
+        "mrre": 0.62,
+        "continuity": 0.73,
+        "trust": 0.91
+    },
+    {
+        "iter": 12,
+        "mrre": 0.60,
+        "continuity": 0.73,
+        "trust": 0.95
+    },
+    {
+        "iter": 13,
+        "mrre": 0.60,
+        "continuity": 0.73,
+        "trust": 0.94
+    },
+    {
+        "iter": 14,
+        "mrre": 0.71,
+        "continuity": 0.88,
+        "trust": 0.95
+    },
+    {
+        "iter": 15,
+        "mrre": 0.83,
+        "continuity": 0.78,
+        "trust": 0.96
+    },
+    {
+        "iter": 16,
+        "mrre": 0.92,
+        "continuity": 0.90,
+        "trust": 0.91
+    },
+    {
+        "iter": 17,
+        "mrre": 0.80,
+        "continuity": 0.82,
+        "trust": 0.90
+    },
+    {
+        "iter": 18,
+        "mrre": 0.91,
+        "continuity": 0.80,
+        "trust": 0.88
+    },
+    {
+        "iter": 19,
+        "mrre": 0.90,
+        "continuity": 0.89,
+        "trust": 0.95
+    }
+]

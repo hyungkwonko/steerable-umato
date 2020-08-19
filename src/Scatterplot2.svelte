@@ -17,11 +17,13 @@
         return csvData
     }
 
-    let data = read_csv("umato-small.csv")
+    let data = read_csv("umato-large.csv")
+
+    let r = 2.5;
+    let textMargin = 7;
 
     let el;
 
-    let r = 5;
     let hs = false;
     let targetIndex = -1;
 	
@@ -135,8 +137,8 @@
 	}
 
     .circle-line {
-        fill-opacity: 1.0;
+        fill-opacity: 0.7;
         stroke: black;
-        stroke-width: 0.4;
+        stroke-width: 0.2;
     }
 </style>

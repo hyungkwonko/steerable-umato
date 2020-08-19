@@ -146,11 +146,6 @@ var app = (function () {
         else if (node.getAttribute(attribute) !== value)
             node.setAttribute(attribute, value);
     }
-    function set_svg_attributes(node, attributes) {
-        for (const key in attributes) {
-            attr(node, key, attributes[key]);
-        }
-    }
     function to_number(value) {
         return value === '' ? undefined : +value;
     }
@@ -525,40 +520,6 @@ var app = (function () {
         : typeof globalThis !== 'undefined'
             ? globalThis
             : global);
-
-    function get_spread_update(levels, updates) {
-        const update = {};
-        const to_null_out = {};
-        const accounted_for = { $$scope: 1 };
-        let i = levels.length;
-        while (i--) {
-            const o = levels[i];
-            const n = updates[i];
-            if (n) {
-                for (const key in o) {
-                    if (!(key in n))
-                        to_null_out[key] = 1;
-                }
-                for (const key in n) {
-                    if (!accounted_for[key]) {
-                        update[key] = n[key];
-                        accounted_for[key] = 1;
-                    }
-                }
-                levels[i] = n;
-            }
-            else {
-                for (const key in o) {
-                    accounted_for[key] = 1;
-                }
-            }
-        }
-        for (const key in to_null_out) {
-            if (!(key in update))
-                update[key] = undefined;
-        }
-        return update;
-    }
     function create_component(block) {
         block && block.c();
     }
@@ -19369,29 +19330,36 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[26] = list[i];
-    	child_ctx[28] = i;
+    	child_ctx[28] = list[i];
+    	child_ctx[30] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[29] = list[i];
+    	child_ctx[31] = list[i];
+    	child_ctx[30] = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[29] = list[i];
+    	child_ctx[33] = list[i];
     	return child_ctx;
     }
 
-    // (114:3) {#each yTicks as tick}
-    function create_each_block_2(ctx) {
+    function get_each_context_3(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[33] = list[i];
+    	return child_ctx;
+    }
+
+    // (86:3) {#each yTicks as tick}
+    function create_each_block_3(ctx) {
     	let g;
     	let line;
     	let text_1;
-    	let t_value = /*tick*/ ctx[29] + "";
+    	let t_value = /*tick*/ ctx[33] + "";
     	let t;
     	let g_class_value;
     	let g_transform_value;
@@ -19403,14 +19371,14 @@ var app = (function () {
     			text_1 = svg_element("text");
     			t = text(t_value);
     			attr_dev(line, "x2", "100%");
-    			attr_dev(line, "class", "svelte-vb4tq4");
-    			add_location(line, file, 115, 5, 3442);
+    			attr_dev(line, "class", "svelte-1q021cs");
+    			add_location(line, file, 87, 5, 2542);
     			attr_dev(text_1, "y", "-4");
-    			attr_dev(text_1, "class", "svelte-vb4tq4");
-    			add_location(text_1, file, 116, 5, 3471);
-    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[29] + " svelte-vb4tq4");
-    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[29]) - /*margin*/ ctx[8].bottom) + ")");
-    			add_location(g, file, 114, 4, 3351);
+    			attr_dev(text_1, "class", "svelte-1q021cs");
+    			add_location(text_1, file, 88, 5, 2571);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[33] + " svelte-1q021cs");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[5](/*tick*/ ctx[33]) - /*margin*/ ctx[12].bottom) + ")");
+    			add_location(g, file, 86, 4, 2451);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, g, anchor);
@@ -19419,7 +19387,78 @@ var app = (function () {
     			append_dev(text_1, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[29]) - /*margin*/ ctx[8].bottom) + ")")) {
+    			if (dirty[0] & /*yScale*/ 32 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[5](/*tick*/ ctx[33]) - /*margin*/ ctx[12].bottom) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_3.name,
+    		type: "each",
+    		source: "(86:3) {#each yTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (97:3) {#each xTicks as tick}
+    function create_each_block_2(ctx) {
+    	let g;
+    	let line;
+    	let line_y__value;
+    	let line_y__value_1;
+    	let text_1;
+
+    	let t_value = (/*width*/ ctx[2] > 380
+    	? /*tick*/ ctx[33]
+    	: formatMobile(/*tick*/ ctx[33])) + "";
+
+    	let t;
+    	let text_1_y_value;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "y1", line_y__value = "-" + /*height*/ ctx[3]);
+    			attr_dev(line, "y2", line_y__value_1 = "-" + /*margin*/ ctx[12].bottom);
+    			attr_dev(line, "x1", "0");
+    			attr_dev(line, "x2", "0");
+    			attr_dev(line, "class", "svelte-1q021cs");
+    			add_location(line, file, 98, 5, 2856);
+    			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[12].bottom - 5));
+    			attr_dev(text_1, "class", "svelte-1q021cs");
+    			add_location(text_1, file, 99, 5, 2926);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[33] + " svelte-1q021cs");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[4](/*tick*/ ctx[33]) + "," + /*height*/ ctx[3] + ")");
+    			add_location(g, file, 97, 4, 2773);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*height*/ 8 && line_y__value !== (line_y__value = "-" + /*height*/ ctx[3])) {
+    				attr_dev(line, "y1", line_y__value);
+    			}
+
+    			if (dirty[0] & /*width*/ 4 && t_value !== (t_value = (/*width*/ ctx[2] > 380
+    			? /*tick*/ ctx[33]
+    			: formatMobile(/*tick*/ ctx[33])) + "")) set_data_dev(t, t_value);
+
+    			if (dirty[0] & /*xScale, height*/ 24 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[4](/*tick*/ ctx[33]) + "," + /*height*/ ctx[3] + ")")) {
     				attr_dev(g, "transform", g_transform_value);
     			}
     		},
@@ -19432,69 +19471,57 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(114:3) {#each yTicks as tick}",
+    		source: "(97:3) {#each xTicks as tick}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (125:3) {#each xTicks as tick}
+    // (115:8) {#each measures as measure, i}
     function create_each_block_1(ctx) {
-    	let g;
-    	let line;
-    	let line_y__value;
-    	let line_y__value_1;
+    	let circle;
+    	let circle_class_value;
+    	let circle_cx_value;
+    	let circle_cy_value;
     	let text_1;
-
-    	let t_value = (/*width*/ ctx[0] > 380
-    	? /*tick*/ ctx[29]
-    	: formatMobile(/*tick*/ ctx[29])) + "";
-
+    	let t_value = /*measure*/ ctx[31] + "";
     	let t;
-    	let g_class_value;
-    	let g_transform_value;
+    	let text_1_x_value;
+    	let text_1_y_value;
 
     	const block = {
     		c: function create() {
-    			g = svg_element("g");
-    			line = svg_element("line");
+    			circle = svg_element("circle");
     			text_1 = svg_element("text");
     			t = text(t_value);
-    			attr_dev(line, "y1", line_y__value = "-" + /*height*/ ctx[1]);
-    			attr_dev(line, "y2", line_y__value_1 = "-" + /*margin*/ ctx[8].bottom);
-    			attr_dev(line, "x1", "0");
-    			attr_dev(line, "x2", "0");
-    			attr_dev(line, "class", "svelte-vb4tq4");
-    			add_location(line, file, 126, 5, 3756);
-    			attr_dev(text_1, "y", "-2");
-    			attr_dev(text_1, "class", "svelte-vb4tq4");
-    			add_location(text_1, file, 127, 5, 3826);
-    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[29] + " svelte-vb4tq4");
-    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[29]) + "," + /*height*/ ctx[1] + ")");
-    			add_location(g, file, 125, 4, 3673);
+    			attr_dev(circle, "class", circle_class_value = "circle-line circle-" + /*measure*/ ctx[31] + " svelte-1q021cs");
+    			attr_dev(circle, "r", /*r*/ ctx[10]);
+    			attr_dev(circle, "cx", circle_cx_value = /*width*/ ctx[2] - 90);
+    			attr_dev(circle, "cy", circle_cy_value = 17 * (/*i*/ ctx[30] + 1));
+    			add_location(circle, file, 115, 12, 3499);
+    			attr_dev(text_1, "x", text_1_x_value = /*width*/ ctx[2] - 70);
+    			attr_dev(text_1, "y", text_1_y_value = 19 * (/*i*/ ctx[30] + 1));
+    			attr_dev(text_1, "font-size", "12px");
+    			add_location(text_1, file, 120, 12, 3671);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, g, anchor);
-    			append_dev(g, line);
-    			append_dev(g, text_1);
+    			insert_dev(target, circle, anchor);
+    			insert_dev(target, text_1, anchor);
     			append_dev(text_1, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*height*/ 2 && line_y__value !== (line_y__value = "-" + /*height*/ ctx[1])) {
-    				attr_dev(line, "y1", line_y__value);
+    			if (dirty[0] & /*width*/ 4 && circle_cx_value !== (circle_cx_value = /*width*/ ctx[2] - 90)) {
+    				attr_dev(circle, "cx", circle_cx_value);
     			}
 
-    			if (dirty[0] & /*width*/ 1 && t_value !== (t_value = (/*width*/ ctx[0] > 380
-    			? /*tick*/ ctx[29]
-    			: formatMobile(/*tick*/ ctx[29])) + "")) set_data_dev(t, t_value);
-
-    			if (dirty[0] & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[29]) + "," + /*height*/ ctx[1] + ")")) {
-    				attr_dev(g, "transform", g_transform_value);
+    			if (dirty[0] & /*width*/ 4 && text_1_x_value !== (text_1_x_value = /*width*/ ctx[2] - 70)) {
+    				attr_dev(text_1, "x", text_1_x_value);
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(g);
+    			if (detaching) detach_dev(circle);
+    			if (detaching) detach_dev(text_1);
     		}
     	};
 
@@ -19502,91 +19529,109 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(125:3) {#each xTicks as tick}",
+    		source: "(115:8) {#each measures as measure, i}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (135:8) {#each data as d, i}
-    function create_each_block(ctx) {
-    	let path0;
+    // (145:12) {:else}
+    function create_else_block(ctx) {
     	let circle0;
+    	let circle0_r_value;
     	let circle0_cx_value;
     	let circle0_cy_value;
-    	let path1;
+    	let text0;
+    	let t0_value = /*d*/ ctx[28].dtm01 + "";
+    	let t0;
+    	let text0_x_value;
+    	let text0_y_value;
     	let circle1;
+    	let circle1_r_value;
     	let circle1_cx_value;
     	let circle1_cy_value;
-    	let path2_1;
+    	let text1;
+    	let t1_value = /*d*/ ctx[28].dtm1 + "";
+    	let t1;
+    	let text1_x_value;
+    	let text1_y_value;
     	let circle2;
+    	let circle2_r_value;
     	let circle2_cx_value;
     	let circle2_cy_value;
+    	let text2;
+    	let t2_value = /*d*/ ctx[28].ce + "";
+    	let t2;
+    	let text2_x_value;
+    	let text2_y_value;
     	let mounted;
     	let dispose;
 
-    	function mouseover_handler(...args) {
-    		return /*mouseover_handler*/ ctx[15](/*d*/ ctx[26], ...args);
+    	function mouseout_handler(...args) {
+    		return /*mouseout_handler*/ ctx[20](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
     	}
 
-    	function mouseover_handler_1(...args) {
-    		return /*mouseover_handler_1*/ ctx[17](/*d*/ ctx[26], ...args);
+    	function mouseout_handler_1(...args) {
+    		return /*mouseout_handler_1*/ ctx[21](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
     	}
 
-    	function mouseover_handler_2(...args) {
-    		return /*mouseover_handler_2*/ ctx[19](/*d*/ ctx[26], ...args);
+    	function mouseout_handler_2(...args) {
+    		return /*mouseout_handler_2*/ ctx[22](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
     	}
 
     	const block = {
     		c: function create() {
-    			path0 = svg_element("path");
     			circle0 = svg_element("circle");
-    			path1 = svg_element("path");
+    			text0 = svg_element("text");
+    			t0 = text(t0_value);
     			circle1 = svg_element("circle");
-    			path2_1 = svg_element("path");
+    			text1 = svg_element("text");
+    			t1 = text(t1_value);
     			circle2 = svg_element("circle");
-    			attr_dev(path0, "class", "path-line path-line-green svelte-vb4tq4");
-    			attr_dev(path0, "d", /*path*/ ctx[4]);
-    			add_location(path0, file, 135, 12, 4025);
-    			attr_dev(circle0, "class", "circle-line circle-green svelte-vb4tq4");
-    			attr_dev(circle0, "r", /*r*/ ctx[7]);
-    			attr_dev(circle0, "cx", circle0_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[26].iter));
-    			attr_dev(circle0, "cy", circle0_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[26].dtm01));
-    			add_location(circle0, file, 136, 12, 4094);
-    			attr_dev(path1, "class", "path-line path-line-red svelte-vb4tq4");
-    			attr_dev(path1, "d", /*path2*/ ctx[5]);
-    			add_location(path1, file, 144, 12, 4408);
-    			attr_dev(circle1, "class", "circle-line circle-red svelte-vb4tq4");
-    			attr_dev(circle1, "r", /*r*/ ctx[7]);
-    			attr_dev(circle1, "cx", circle1_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[26].iter));
-    			attr_dev(circle1, "cy", circle1_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[26].dtm1));
-    			add_location(circle1, file, 145, 12, 4476);
-    			attr_dev(path2_1, "class", "path-line path-line-blue svelte-vb4tq4");
-    			attr_dev(path2_1, "d", /*path3*/ ctx[6]);
-    			add_location(path2_1, file, 153, 12, 4787);
-    			attr_dev(circle2, "class", "circle-line circle-blue svelte-vb4tq4");
-    			attr_dev(circle2, "r", /*r*/ ctx[7]);
-    			attr_dev(circle2, "cx", circle2_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[26].iter));
-    			attr_dev(circle2, "cy", circle2_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[26].ce));
-    			add_location(circle2, file, 154, 12, 4856);
+    			text2 = svg_element("text");
+    			t2 = text(t2_value);
+    			attr_dev(circle0, "class", "circle-line circle-dtm01 svelte-1q021cs");
+    			attr_dev(circle0, "r", circle0_r_value = 10);
+    			attr_dev(circle0, "cx", circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle0, "cy", circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm01));
+    			add_location(circle0, file, 145, 16, 4657);
+    			attr_dev(text0, "x", text0_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11]);
+    			attr_dev(text0, "y", text0_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm01) - /*textMargin*/ ctx[11]);
+    			add_location(text0, file, 151, 16, 4917);
+    			attr_dev(circle1, "class", "circle-line circle-dtm1 svelte-1q021cs");
+    			attr_dev(circle1, "r", circle1_r_value = 10);
+    			attr_dev(circle1, "cx", circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle1, "cy", circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm1));
+    			add_location(circle1, file, 152, 16, 5025);
+    			attr_dev(text1, "x", text1_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11]);
+    			attr_dev(text1, "y", text1_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm1) - /*textMargin*/ ctx[11]);
+    			add_location(text1, file, 158, 16, 5283);
+    			attr_dev(circle2, "class", "circle-line circle-ce svelte-1q021cs");
+    			attr_dev(circle2, "r", circle2_r_value = 10);
+    			attr_dev(circle2, "cx", circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle2, "cy", circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].ce));
+    			add_location(circle2, file, 159, 16, 5389);
+    			attr_dev(text2, "x", text2_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11]);
+    			attr_dev(text2, "y", text2_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].ce) - /*textMargin*/ ctx[11]);
+    			add_location(text2, file, 165, 16, 5643);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, path0, anchor);
     			insert_dev(target, circle0, anchor);
-    			insert_dev(target, path1, anchor);
+    			insert_dev(target, text0, anchor);
+    			append_dev(text0, t0);
     			insert_dev(target, circle1, anchor);
-    			insert_dev(target, path2_1, anchor);
+    			insert_dev(target, text1, anchor);
+    			append_dev(text1, t1);
     			insert_dev(target, circle2, anchor);
+    			insert_dev(target, text2, anchor);
+    			append_dev(text2, t2);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(circle0, "mouseover", mouseover_handler, false, false, false),
-    					listen_dev(circle0, "mouseout", /*mouseout_handler*/ ctx[16], false, false, false),
-    					listen_dev(circle1, "mouseover", mouseover_handler_1, false, false, false),
-    					listen_dev(circle1, "mouseout", /*mouseout_handler_1*/ ctx[18], false, false, false),
-    					listen_dev(circle2, "mouseover", mouseover_handler_2, false, false, false),
-    					listen_dev(circle2, "mouseout", /*mouseout_handler_2*/ ctx[20], false, false, false)
+    					listen_dev(circle0, "mouseout", mouseout_handler, false, false, false),
+    					listen_dev(circle1, "mouseout", mouseout_handler_1, false, false, false),
+    					listen_dev(circle2, "mouseout", mouseout_handler_2, false, false, false)
     				];
 
     				mounted = true;
@@ -19595,48 +19640,169 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty[0] & /*path*/ 16) {
-    				attr_dev(path0, "d", /*path*/ ctx[4]);
-    			}
-
-    			if (dirty[0] & /*xScale*/ 4 && circle0_cx_value !== (circle0_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[26].iter))) {
+    			if (dirty[0] & /*xScale*/ 16 && circle0_cx_value !== (circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
     				attr_dev(circle0, "cx", circle0_cx_value);
     			}
 
-    			if (dirty[0] & /*yScale*/ 8 && circle0_cy_value !== (circle0_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[26].dtm01))) {
+    			if (dirty[0] & /*yScale*/ 32 && circle0_cy_value !== (circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm01))) {
     				attr_dev(circle0, "cy", circle0_cy_value);
     			}
 
-    			if (dirty[0] & /*path2*/ 32) {
-    				attr_dev(path1, "d", /*path2*/ ctx[5]);
+    			if (dirty[0] & /*xScale*/ 16 && text0_x_value !== (text0_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11])) {
+    				attr_dev(text0, "x", text0_x_value);
     			}
 
-    			if (dirty[0] & /*xScale*/ 4 && circle1_cx_value !== (circle1_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[26].iter))) {
+    			if (dirty[0] & /*yScale*/ 32 && text0_y_value !== (text0_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm01) - /*textMargin*/ ctx[11])) {
+    				attr_dev(text0, "y", text0_y_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle1_cx_value !== (circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
     				attr_dev(circle1, "cx", circle1_cx_value);
     			}
 
-    			if (dirty[0] & /*yScale*/ 8 && circle1_cy_value !== (circle1_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[26].dtm1))) {
+    			if (dirty[0] & /*yScale*/ 32 && circle1_cy_value !== (circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm1))) {
     				attr_dev(circle1, "cy", circle1_cy_value);
     			}
 
-    			if (dirty[0] & /*path3*/ 64) {
-    				attr_dev(path2_1, "d", /*path3*/ ctx[6]);
+    			if (dirty[0] & /*xScale*/ 16 && text1_x_value !== (text1_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11])) {
+    				attr_dev(text1, "x", text1_x_value);
     			}
 
-    			if (dirty[0] & /*xScale*/ 4 && circle2_cx_value !== (circle2_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[26].iter))) {
+    			if (dirty[0] & /*yScale*/ 32 && text1_y_value !== (text1_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm1) - /*textMargin*/ ctx[11])) {
+    				attr_dev(text1, "y", text1_y_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle2_cx_value !== (circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
     				attr_dev(circle2, "cx", circle2_cx_value);
     			}
 
-    			if (dirty[0] & /*yScale*/ 8 && circle2_cy_value !== (circle2_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[26].ce))) {
+    			if (dirty[0] & /*yScale*/ 32 && circle2_cy_value !== (circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].ce))) {
+    				attr_dev(circle2, "cy", circle2_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && text2_x_value !== (text2_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11])) {
+    				attr_dev(text2, "x", text2_x_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && text2_y_value !== (text2_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].ce) - /*textMargin*/ ctx[11])) {
+    				attr_dev(text2, "y", text2_y_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(circle0);
+    			if (detaching) detach_dev(text0);
+    			if (detaching) detach_dev(circle1);
+    			if (detaching) detach_dev(text1);
+    			if (detaching) detach_dev(circle2);
+    			if (detaching) detach_dev(text2);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(145:12) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (126:12) {#if !hs || i != targetIndex}
+    function create_if_block(ctx) {
+    	let circle0;
+    	let circle0_cx_value;
+    	let circle0_cy_value;
+    	let circle1;
+    	let circle1_cx_value;
+    	let circle1_cy_value;
+    	let circle2;
+    	let circle2_cx_value;
+    	let circle2_cy_value;
+    	let mounted;
+    	let dispose;
+
+    	function mouseover_handler(...args) {
+    		return /*mouseover_handler*/ ctx[17](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	function mouseover_handler_1(...args) {
+    		return /*mouseover_handler_1*/ ctx[18](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	function mouseover_handler_2(...args) {
+    		return /*mouseover_handler_2*/ ctx[19](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			circle0 = svg_element("circle");
+    			circle1 = svg_element("circle");
+    			circle2 = svg_element("circle");
+    			attr_dev(circle0, "class", "circle-line circle-dtm01 svelte-1q021cs");
+    			attr_dev(circle0, "r", /*r*/ ctx[10]);
+    			attr_dev(circle0, "cx", circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle0, "cy", circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm01));
+    			add_location(circle0, file, 126, 16, 3874);
+    			attr_dev(circle1, "class", "circle-line circle-dtm1 svelte-1q021cs");
+    			attr_dev(circle1, "r", /*r*/ ctx[10]);
+    			attr_dev(circle1, "cx", circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle1, "cy", circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm1));
+    			add_location(circle1, file, 132, 16, 4131);
+    			attr_dev(circle2, "class", "circle-line circle-ce svelte-1q021cs");
+    			attr_dev(circle2, "r", /*r*/ ctx[10]);
+    			attr_dev(circle2, "cx", circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle2, "cy", circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].ce));
+    			add_location(circle2, file, 138, 16, 4386);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, circle0, anchor);
+    			insert_dev(target, circle1, anchor);
+    			insert_dev(target, circle2, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(circle0, "mouseover", mouseover_handler, false, false, false),
+    					listen_dev(circle1, "mouseover", mouseover_handler_1, false, false, false),
+    					listen_dev(circle2, "mouseover", mouseover_handler_2, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty[0] & /*xScale*/ 16 && circle0_cx_value !== (circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle0, "cx", circle0_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle0_cy_value !== (circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm01))) {
+    				attr_dev(circle0, "cy", circle0_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle1_cx_value !== (circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle1, "cx", circle1_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle1_cy_value !== (circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].dtm1))) {
+    				attr_dev(circle1, "cy", circle1_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle2_cx_value !== (circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle2, "cx", circle2_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle2_cy_value !== (circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].ce))) {
     				attr_dev(circle2, "cy", circle2_cy_value);
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(path0);
     			if (detaching) detach_dev(circle0);
-    			if (detaching) detach_dev(path1);
     			if (detaching) detach_dev(circle1);
-    			if (detaching) detach_dev(path2_1);
     			if (detaching) detach_dev(circle2);
     			mounted = false;
     			run_all(dispose);
@@ -19645,9 +19811,60 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(126:12) {#if !hs || i != targetIndex}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (125:8) {#each data as d, i}
+    function create_each_block(ctx) {
+    	let if_block_anchor;
+
+    	function select_block_type(ctx, dirty) {
+    		if (!/*hs*/ ctx[0] || /*i*/ ctx[30] != /*targetIndex*/ ctx[1]) return create_if_block;
+    		return create_else_block;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(135:8) {#each data as d, i}",
+    		source: "(125:8) {#each data as d, i}",
     		ctx
     	});
 
@@ -19660,8 +19877,23 @@ var app = (function () {
     	let g0;
     	let g0_transform_value;
     	let g1;
+    	let path0;
+    	let path1;
+    	let path2_1;
+    	let text_1;
+    	let t;
+    	let text_1_x_value;
+    	let each2_anchor;
     	let div_resize_listener;
-    	let each_value_2 = /*yTicks*/ ctx[9];
+    	let each_value_3 = /*yTicks*/ ctx[13];
+    	validate_each_argument(each_value_3);
+    	let each_blocks_3 = [];
+
+    	for (let i = 0; i < each_value_3.length; i += 1) {
+    		each_blocks_3[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
+    	}
+
+    	let each_value_2 = /*xTicks*/ ctx[14];
     	validate_each_argument(each_value_2);
     	let each_blocks_2 = [];
 
@@ -19669,7 +19901,7 @@ var app = (function () {
     		each_blocks_2[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
     	}
 
-    	let each_value_1 = /*xTicks*/ ctx[10];
+    	let each_value_1 = /*measures*/ ctx[9];
     	validate_each_argument(each_value_1);
     	let each_blocks_1 = [];
 
@@ -19691,30 +19923,55 @@ var app = (function () {
     			svg = svg_element("svg");
     			g0 = svg_element("g");
 
-    			for (let i = 0; i < each_blocks_2.length; i += 1) {
-    				each_blocks_2[i].c();
+    			for (let i = 0; i < each_blocks_3.length; i += 1) {
+    				each_blocks_3[i].c();
     			}
 
     			g1 = svg_element("g");
 
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			path0 = svg_element("path");
+    			path1 = svg_element("path");
+    			path2_1 = svg_element("path");
+    			text_1 = svg_element("text");
+    			t = text("Iteration #");
+
     			for (let i = 0; i < each_blocks_1.length; i += 1) {
     				each_blocks_1[i].c();
     			}
+
+    			each2_anchor = empty();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
     			attr_dev(g0, "class", "axis y-axis");
-    			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[8].top + ")");
-    			add_location(g0, file, 112, 2, 3258);
-    			attr_dev(g1, "class", "axis x-axis svelte-vb4tq4");
-    			add_location(g1, file, 123, 2, 3619);
-    			attr_dev(svg, "class", "svelte-vb4tq4");
-    			add_location(svg, file, 110, 1, 3232);
-    			attr_dev(div, "class", "chart svelte-vb4tq4");
-    			add_render_callback(() => /*div_elementresize_handler*/ ctx[21].call(div));
-    			add_location(div, file, 109, 0, 3159);
+    			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[12].top + ")");
+    			add_location(g0, file, 84, 2, 2358);
+    			attr_dev(g1, "class", "axis x-axis svelte-1q021cs");
+    			add_location(g1, file, 95, 2, 2719);
+    			attr_dev(path0, "class", "path-line path-line-dtm01 svelte-1q021cs");
+    			attr_dev(path0, "d", /*path*/ ctx[6]);
+    			add_location(path0, file, 106, 8, 3114);
+    			attr_dev(path1, "class", "path-line path-line-dtm1 svelte-1q021cs");
+    			attr_dev(path1, "d", /*path2*/ ctx[7]);
+    			add_location(path1, file, 107, 8, 3179);
+    			attr_dev(path2_1, "class", "path-line path-line-ce svelte-1q021cs");
+    			attr_dev(path2_1, "d", /*path3*/ ctx[8]);
+    			add_location(path2_1, file, 108, 8, 3244);
+    			attr_dev(text_1, "x", text_1_x_value = (/*width*/ ctx[2] - /*margin*/ ctx[12].left) / 2);
+    			attr_dev(text_1, "y", /*height*/ ctx[3]);
+    			attr_dev(text_1, "font-size", "12px");
+    			add_location(text_1, file, 111, 8, 3336);
+    			attr_dev(svg, "class", "svelte-1q021cs");
+    			add_location(svg, file, 82, 1, 2332);
+    			attr_dev(div, "class", "chart svelte-1q021cs");
+    			add_render_callback(() => /*div_elementresize_handler*/ ctx[23].call(div));
+    			add_location(div, file, 81, 0, 2259);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19724,25 +19981,61 @@ var app = (function () {
     			append_dev(div, svg);
     			append_dev(svg, g0);
 
-    			for (let i = 0; i < each_blocks_2.length; i += 1) {
-    				each_blocks_2[i].m(g0, null);
+    			for (let i = 0; i < each_blocks_3.length; i += 1) {
+    				each_blocks_3[i].m(g0, null);
     			}
 
     			append_dev(svg, g1);
 
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].m(g1, null);
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].m(g1, null);
     			}
+
+    			append_dev(svg, path0);
+    			append_dev(svg, path1);
+    			append_dev(svg, path2_1);
+    			append_dev(svg, text_1);
+    			append_dev(text_1, t);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(svg, null);
+    			}
+
+    			append_dev(svg, each2_anchor);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(svg, null);
     			}
 
-    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[21].bind(div));
+    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[23].bind(div));
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*yTicks, yScale, margin*/ 776) {
-    				each_value_2 = /*yTicks*/ ctx[9];
+    			if (dirty[0] & /*yTicks, yScale, margin*/ 12320) {
+    				each_value_3 = /*yTicks*/ ctx[13];
+    				validate_each_argument(each_value_3);
+    				let i;
+
+    				for (i = 0; i < each_value_3.length; i += 1) {
+    					const child_ctx = get_each_context_3(ctx, each_value_3, i);
+
+    					if (each_blocks_3[i]) {
+    						each_blocks_3[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_3[i] = create_each_block_3(child_ctx);
+    						each_blocks_3[i].c();
+    						each_blocks_3[i].m(g0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_3.length; i += 1) {
+    					each_blocks_3[i].d(1);
+    				}
+
+    				each_blocks_3.length = each_value_3.length;
+    			}
+
+    			if (dirty[0] & /*xTicks, xScale, height, margin, width*/ 20508) {
+    				each_value_2 = /*xTicks*/ ctx[14];
     				validate_each_argument(each_value_2);
     				let i;
 
@@ -19754,7 +20047,7 @@ var app = (function () {
     					} else {
     						each_blocks_2[i] = create_each_block_2(child_ctx);
     						each_blocks_2[i].c();
-    						each_blocks_2[i].m(g0, null);
+    						each_blocks_2[i].m(g1, null);
     					}
     				}
 
@@ -19765,8 +20058,28 @@ var app = (function () {
     				each_blocks_2.length = each_value_2.length;
     			}
 
-    			if (dirty[0] & /*xTicks, xScale, height, width, margin*/ 1287) {
-    				each_value_1 = /*xTicks*/ ctx[10];
+    			if (dirty[0] & /*path*/ 64) {
+    				attr_dev(path0, "d", /*path*/ ctx[6]);
+    			}
+
+    			if (dirty[0] & /*path2*/ 128) {
+    				attr_dev(path1, "d", /*path2*/ ctx[7]);
+    			}
+
+    			if (dirty[0] & /*path3*/ 256) {
+    				attr_dev(path2_1, "d", /*path3*/ ctx[8]);
+    			}
+
+    			if (dirty[0] & /*width*/ 4 && text_1_x_value !== (text_1_x_value = (/*width*/ ctx[2] - /*margin*/ ctx[12].left) / 2)) {
+    				attr_dev(text_1, "x", text_1_x_value);
+    			}
+
+    			if (dirty[0] & /*height*/ 8) {
+    				attr_dev(text_1, "y", /*height*/ ctx[3]);
+    			}
+
+    			if (dirty[0] & /*width, measures, r*/ 1540) {
+    				each_value_1 = /*measures*/ ctx[9];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -19778,7 +20091,7 @@ var app = (function () {
     					} else {
     						each_blocks_1[i] = create_each_block_1(child_ctx);
     						each_blocks_1[i].c();
-    						each_blocks_1[i].m(g1, null);
+    						each_blocks_1[i].m(svg, each2_anchor);
     					}
     				}
 
@@ -19789,7 +20102,7 @@ var app = (function () {
     				each_blocks_1.length = each_value_1.length;
     			}
 
-    			if (dirty[0] & /*r, xScale, yScale, hoverState3, hoverStateOut, path3, hoverState2, path2, hoverState1, path*/ 30972) {
+    			if (dirty[0] & /*r, xScale, yScale, hoverState, hs, targetIndex, textMargin, hoverStateOut*/ 101427) {
     				each_value = data;
     				validate_each_argument(each_value);
     				let i;
@@ -19817,6 +20130,7 @@ var app = (function () {
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks_3, detaching);
     			destroy_each(each_blocks_2, detaching);
     			destroy_each(each_blocks_1, detaching);
     			destroy_each(each_blocks, detaching);
@@ -19842,20 +20156,22 @@ var app = (function () {
     	return "translate(" + x + "," + y + ")";
     }
 
+    // $: dot = data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`);
     // $: area = `${path}L${xScale(maxX)},${yScale(0)}L${xScale(minX)},${yScale(0)}Z`;
     function formatMobile(tick) {
     	return "'" + tick % 100;
     }
 
-    function hoverState(e) {
-    	
-    } // call all three hoverState1, hoverState2, hoverState3, here
-
     function instance($$self, $$props, $$invalidate) {
     	console.log(data);
+    	let measures = ["dtm01", "dtm1", "ce"];
     	let r = 5;
+    	let textMargin = 7;
+    	let legendMargin;
     	let el;
-    	const margin = { top: 20, right: 15, bottom: 20, left: 25 };
+    	let hs = false;
+    	let targetIndex = -1;
+    	const margin = { top: 20, right: 15, bottom: 30, left: 25 };
     	let width = svgWidth - margin.left - margin.right;
     	let height = svgHeight - margin.top - margin.bottom;
 
@@ -19869,26 +20185,14 @@ var app = (function () {
     	const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     	console.log(data[0]);
 
-    	function hoverState1(e, d) {
-    		console.log(e);
-    		select(e).attr("r", r * 2);
-    		select("svg").select("g").append("text").attr("id", 10).attr("x", xScale(d.iter)).attr("y", yScale(d.dtm01)).style("text-anchor", "end").text("asdsads");
+    	function hoverState(e, d, i) {
+    		$$invalidate(0, hs = true);
+    		$$invalidate(1, targetIndex = i);
     	}
 
-    	function hoverState2(e, d) {
-    		console.log(e);
-    		select(e).attr("r", r * 2);
-    		select("svg").select("g").append("text").attr("id", 10).attr("x", xScale(d.iter)).attr("y", yScale(d.dtm1)).style("text-anchor", "end").text("asdsads");
-    	}
-
-    	function hoverState3(e, d) {
-    		console.log(e);
-    		select(e).attr("r", r * 2);
-    		select("svg").select("g").append("text").attr("id", 10).attr("x", xScale(d.iter)).attr("y", yScale(d.ce)).style("text-anchor", "end").text("asdsads");
-    	}
-
-    	function hoverStateOut(e) {
-    		select(e).attr("r", 5);
+    	function hoverStateOut(e, d, i) {
+    		$$invalidate(0, hs = false);
+    		$$invalidate(1, targetIndex = -1);
     	}
 
     	const writable_props = [];
@@ -19899,18 +20203,18 @@ var app = (function () {
 
     	let { $$slots = {}, $$scope } = $$props;
     	validate_slots("Linechart", $$slots, []);
-    	const mouseover_handler = (d, e) => hoverState1(e.currentTarget, d);
-    	const mouseout_handler = e => hoverStateOut(e.currentTarget);
-    	const mouseover_handler_1 = (d, e) => hoverState2(e.currentTarget, d);
-    	const mouseout_handler_1 = e => hoverStateOut(e.currentTarget);
-    	const mouseover_handler_2 = (d, e) => hoverState3(e.currentTarget, d);
-    	const mouseout_handler_2 = e => hoverStateOut(e.currentTarget);
+    	const mouseover_handler = (d, i, e) => hoverState(e, d, i);
+    	const mouseover_handler_1 = (d, i, e) => hoverState(e, d, i);
+    	const mouseover_handler_2 = (d, i, e) => hoverState(e, d, i);
+    	const mouseout_handler = (d, i, e) => hoverStateOut();
+    	const mouseout_handler_1 = (d, i, e) => hoverStateOut();
+    	const mouseout_handler_2 = (d, i, e) => hoverStateOut();
 
     	function div_elementresize_handler() {
     		width = this.clientWidth;
     		height = this.clientHeight;
-    		$$invalidate(0, width);
-    		$$invalidate(1, height);
+    		$$invalidate(2, width);
+    		$$invalidate(3, height);
     	}
 
     	$$self.$capture_state = () => ({
@@ -19920,8 +20224,13 @@ var app = (function () {
     		afterUpdate,
     		data,
     		translate,
+    		measures,
     		r,
+    		textMargin,
+    		legendMargin,
     		el,
+    		hs,
+    		targetIndex,
     		svgWidth,
     		svgHeight,
     		margin,
@@ -19930,9 +20239,6 @@ var app = (function () {
     		yTicks,
     		xTicks,
     		formatMobile,
-    		hoverState1,
-    		hoverState2,
-    		hoverState3,
     		hoverState,
     		hoverStateOut,
     		xScale,
@@ -19941,23 +20247,26 @@ var app = (function () {
     		yScale,
     		path,
     		path2,
-    		path3,
-    		dot
+    		path3
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("r" in $$props) $$invalidate(7, r = $$props.r);
+    		if ("measures" in $$props) $$invalidate(9, measures = $$props.measures);
+    		if ("r" in $$props) $$invalidate(10, r = $$props.r);
+    		if ("textMargin" in $$props) $$invalidate(11, textMargin = $$props.textMargin);
+    		if ("legendMargin" in $$props) legendMargin = $$props.legendMargin;
     		if ("el" in $$props) el = $$props.el;
-    		if ("width" in $$props) $$invalidate(0, width = $$props.width);
-    		if ("height" in $$props) $$invalidate(1, height = $$props.height);
-    		if ("xScale" in $$props) $$invalidate(2, xScale = $$props.xScale);
-    		if ("minX" in $$props) $$invalidate(22, minX = $$props.minX);
-    		if ("maxX" in $$props) $$invalidate(23, maxX = $$props.maxX);
-    		if ("yScale" in $$props) $$invalidate(3, yScale = $$props.yScale);
-    		if ("path" in $$props) $$invalidate(4, path = $$props.path);
-    		if ("path2" in $$props) $$invalidate(5, path2 = $$props.path2);
-    		if ("path3" in $$props) $$invalidate(6, path3 = $$props.path3);
-    		if ("dot" in $$props) dot = $$props.dot;
+    		if ("hs" in $$props) $$invalidate(0, hs = $$props.hs);
+    		if ("targetIndex" in $$props) $$invalidate(1, targetIndex = $$props.targetIndex);
+    		if ("width" in $$props) $$invalidate(2, width = $$props.width);
+    		if ("height" in $$props) $$invalidate(3, height = $$props.height);
+    		if ("xScale" in $$props) $$invalidate(4, xScale = $$props.xScale);
+    		if ("minX" in $$props) $$invalidate(24, minX = $$props.minX);
+    		if ("maxX" in $$props) $$invalidate(25, maxX = $$props.maxX);
+    		if ("yScale" in $$props) $$invalidate(5, yScale = $$props.yScale);
+    		if ("path" in $$props) $$invalidate(6, path = $$props.path);
+    		if ("path2" in $$props) $$invalidate(7, path2 = $$props.path2);
+    		if ("path3" in $$props) $$invalidate(8, path3 = $$props.path3);
     	};
 
     	let xScale;
@@ -19967,42 +20276,39 @@ var app = (function () {
     	let path;
     	let path2;
     	let path3;
-    	let dot;
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty[0] & /*minX, maxX, width*/ 12582913) {
-    			 $$invalidate(2, xScale = linear$2().domain([minX, maxX]).range([margin.left, width - margin.right]));
+    		if ($$self.$$.dirty[0] & /*minX, maxX, width*/ 50331652) {
+    			 $$invalidate(4, xScale = linear$2().domain([minX, maxX]).range([margin.left, width - margin.right]));
     		}
 
-    		if ($$self.$$.dirty[0] & /*height*/ 2) {
-    			 $$invalidate(3, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
+    		if ($$self.$$.dirty[0] & /*height*/ 8) {
+    			 $$invalidate(5, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
     		}
 
-    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 12) {
-    			 $$invalidate(4, path = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`).join("L")}`);
+    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 48) {
+    			 $$invalidate(6, path = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`).join("L")}`);
     		}
 
-    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 12) {
-    			 $$invalidate(5, path2 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm1)}`).join("L")}`);
+    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 48) {
+    			 $$invalidate(7, path2 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm1)}`).join("L")}`);
     		}
 
-    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 12) {
-    			 $$invalidate(6, path3 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.ce)}`).join("L")}`);
-    		}
-
-    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 12) {
-    			 dot = data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`);
+    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 48) {
+    			 $$invalidate(8, path3 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.ce)}`).join("L")}`);
     		}
     	};
 
-    	 $$invalidate(22, minX = min(data, d => d.iter));
-    	 $$invalidate(23, maxX = max(data, d => d.iter));
+    	 $$invalidate(24, minX = min(data, d => d.iter));
+    	 $$invalidate(25, maxX = max(data, d => d.iter));
 
     	return [
+    		hs,
+    		targetIndex,
     		width,
     		height,
     		xScale,
@@ -20010,19 +20316,19 @@ var app = (function () {
     		path,
     		path2,
     		path3,
+    		measures,
     		r,
+    		textMargin,
     		margin,
     		yTicks,
     		xTicks,
-    		hoverState1,
-    		hoverState2,
-    		hoverState3,
+    		hoverState,
     		hoverStateOut,
     		mouseover_handler,
-    		mouseout_handler,
     		mouseover_handler_1,
-    		mouseout_handler_1,
     		mouseover_handler_2,
+    		mouseout_handler,
+    		mouseout_handler_1,
     		mouseout_handler_2,
     		div_elementresize_handler
     	];
@@ -20042,56 +20348,542 @@ var app = (function () {
     	}
     }
 
-    /* src/Barchart.svelte generated by Svelte v3.24.1 */
+    var data$1 = [{iter:0,mrre:0.45,continuity:0.44,trust:0.29},{iter:1,mrre:0.47,continuity:0.63,trust:0.6},{iter:2,mrre:0.47,continuity:0.66,trust:0.69},{iter:3,mrre:0.4,continuity:0.7,trust:0.59},{iter:4,mrre:0.59,continuity:0.71,trust:0.6},{iter:5,mrre:0.6,continuity:0.59,trust:0.62},{iter:6,mrre:0.6,continuity:0.73,trust:0.66},{iter:7,mrre:0.6,continuity:0.69,trust:0.66},{iter:8,mrre:0.6,continuity:0.73,trust:0.8},{iter:9,mrre:0.59,continuity:0.73,trust:0.89},{iter:10,mrre:0.6,continuity:0.73,trust:0.91},{iter:11,mrre:0.62,continuity:0.73,trust:0.91},{iter:12,mrre:0.6,continuity:0.73,trust:0.95},{iter:13,mrre:0.6,continuity:0.73,trust:0.94},{iter:14,mrre:0.71,continuity:0.88,trust:0.95},{iter:15,mrre:0.83,continuity:0.78,trust:0.96},{iter:16,mrre:0.92,continuity:0.9,trust:0.91},{iter:17,mrre:0.8,continuity:0.82,trust:0.9},{iter:18,mrre:0.91,continuity:0.8,trust:0.88},{iter:19,mrre:0.9,continuity:0.89,trust:0.95}];
+
+    /* src/Linechart2.svelte generated by Svelte v3.24.1 */
 
     const { console: console_1$1 } = globals;
-    const file$1 = "src/Barchart.svelte";
+    const file$1 = "src/Linechart2.svelte";
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[18] = list[i];
-    	child_ctx[20] = i;
+    	child_ctx[28] = list[i];
+    	child_ctx[30] = i;
     	return child_ctx;
     }
 
-    // (113:12) {#each rects as r, i}
-    function create_each_block$1(ctx) {
-    	let rect;
+    function get_each_context_1$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[31] = list[i];
+    	child_ctx[30] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_2$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[33] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_3$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[33] = list[i];
+    	return child_ctx;
+    }
+
+    // (80:3) {#each yTicks as tick}
+    function create_each_block_3$1(ctx) {
+    	let g;
+    	let line;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[33] + "";
+    	let t;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "x2", "100%");
+    			attr_dev(line, "class", "svelte-2vz4cw");
+    			add_location(line, file$1, 81, 5, 2243);
+    			attr_dev(text_1, "y", "-4");
+    			attr_dev(text_1, "class", "svelte-2vz4cw");
+    			add_location(text_1, file$1, 82, 5, 2272);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[33] + " svelte-2vz4cw");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[5](/*tick*/ ctx[33]) - /*margin*/ ctx[12].bottom) + ")");
+    			add_location(g, file$1, 80, 4, 2152);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*yScale*/ 32 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[5](/*tick*/ ctx[33]) - /*margin*/ ctx[12].bottom) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_3$1.name,
+    		type: "each",
+    		source: "(80:3) {#each yTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (91:3) {#each xTicks as tick}
+    function create_each_block_2$1(ctx) {
+    	let g;
+    	let line;
+    	let line_y__value;
+    	let line_y__value_1;
+    	let text_1;
+
+    	let t_value = (/*width*/ ctx[2] > 380
+    	? /*tick*/ ctx[33]
+    	: formatMobile$1(/*tick*/ ctx[33])) + "";
+
+    	let t;
+    	let text_1_y_value;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "y1", line_y__value = "-" + /*height*/ ctx[3]);
+    			attr_dev(line, "y2", line_y__value_1 = "-" + /*margin*/ ctx[12].bottom);
+    			attr_dev(line, "x1", "0");
+    			attr_dev(line, "x2", "0");
+    			attr_dev(line, "class", "svelte-2vz4cw");
+    			add_location(line, file$1, 92, 5, 2557);
+    			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[12].bottom - 5));
+    			attr_dev(text_1, "class", "svelte-2vz4cw");
+    			add_location(text_1, file$1, 93, 5, 2627);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[33] + " svelte-2vz4cw");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[4](/*tick*/ ctx[33]) + "," + /*height*/ ctx[3] + ")");
+    			add_location(g, file$1, 91, 4, 2474);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*height*/ 8 && line_y__value !== (line_y__value = "-" + /*height*/ ctx[3])) {
+    				attr_dev(line, "y1", line_y__value);
+    			}
+
+    			if (dirty[0] & /*width*/ 4 && t_value !== (t_value = (/*width*/ ctx[2] > 380
+    			? /*tick*/ ctx[33]
+    			: formatMobile$1(/*tick*/ ctx[33])) + "")) set_data_dev(t, t_value);
+
+    			if (dirty[0] & /*xScale, height*/ 24 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[4](/*tick*/ ctx[33]) + "," + /*height*/ ctx[3] + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2$1.name,
+    		type: "each",
+    		source: "(91:3) {#each xTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (109:8) {#each measures as measure, i}
+    function create_each_block_1$1(ctx) {
+    	let circle;
+    	let circle_class_value;
+    	let circle_cx_value;
+    	let circle_cy_value;
+    	let text_1;
+    	let t_value = /*measure*/ ctx[31] + "";
+    	let t;
+    	let text_1_x_value;
+    	let text_1_y_value;
+
+    	const block = {
+    		c: function create() {
+    			circle = svg_element("circle");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(circle, "class", circle_class_value = "circle-line circle-" + /*measure*/ ctx[31] + " svelte-2vz4cw");
+    			attr_dev(circle, "r", /*r*/ ctx[10]);
+    			attr_dev(circle, "cx", circle_cx_value = /*width*/ ctx[2] - 100);
+    			attr_dev(circle, "cy", circle_cy_value = 280 + 17 * (/*i*/ ctx[30] + 1));
+    			add_location(circle, file$1, 109, 12, 3208);
+    			attr_dev(text_1, "x", text_1_x_value = /*width*/ ctx[2] - 80);
+    			attr_dev(text_1, "y", text_1_y_value = 280 + 19 * (/*i*/ ctx[30] + 1));
+    			attr_dev(text_1, "font-size", "12px");
+    			add_location(text_1, file$1, 114, 12, 3387);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, circle, anchor);
+    			insert_dev(target, text_1, anchor);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*width*/ 4 && circle_cx_value !== (circle_cx_value = /*width*/ ctx[2] - 100)) {
+    				attr_dev(circle, "cx", circle_cx_value);
+    			}
+
+    			if (dirty[0] & /*width*/ 4 && text_1_x_value !== (text_1_x_value = /*width*/ ctx[2] - 80)) {
+    				attr_dev(text_1, "x", text_1_x_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(circle);
+    			if (detaching) detach_dev(text_1);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$1.name,
+    		type: "each",
+    		source: "(109:8) {#each measures as measure, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (139:12) {:else}
+    function create_else_block$1(ctx) {
+    	let circle0;
+    	let circle0_r_value;
+    	let circle0_cx_value;
+    	let circle0_cy_value;
+    	let text0;
+    	let t0_value = /*d*/ ctx[28].mrre + "";
+    	let t0;
+    	let text0_x_value;
+    	let text0_y_value;
+    	let circle1;
+    	let circle1_r_value;
+    	let circle1_cx_value;
+    	let circle1_cy_value;
+    	let text1;
+    	let t1_value = /*d*/ ctx[28].continuity + "";
+    	let t1;
+    	let text1_x_value;
+    	let text1_y_value;
+    	let circle2;
+    	let circle2_r_value;
+    	let circle2_cx_value;
+    	let circle2_cy_value;
+    	let text2;
+    	let t2_value = /*d*/ ctx[28].trust + "";
+    	let t2;
+    	let text2_x_value;
+    	let text2_y_value;
     	let mounted;
     	let dispose;
-    	let rect_levels = [/*r*/ ctx[18]];
-    	let rect_data = {};
 
-    	for (let i = 0; i < rect_levels.length; i += 1) {
-    		rect_data = assign(rect_data, rect_levels[i]);
+    	function mouseout_handler(...args) {
+    		return /*mouseout_handler*/ ctx[20](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
     	}
 
-    	function dblclick_handler(...args) {
-    		return /*dblclick_handler*/ ctx[9](/*i*/ ctx[20], ...args);
+    	function mouseout_handler_1(...args) {
+    		return /*mouseout_handler_1*/ ctx[21](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	function mouseout_handler_2(...args) {
+    		return /*mouseout_handler_2*/ ctx[22](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
     	}
 
     	const block = {
     		c: function create() {
-    			rect = svg_element("rect");
-    			set_svg_attributes(rect, rect_data);
-    			add_location(rect, file$1, 113, 16, 2976);
+    			circle0 = svg_element("circle");
+    			text0 = svg_element("text");
+    			t0 = text(t0_value);
+    			circle1 = svg_element("circle");
+    			text1 = svg_element("text");
+    			t1 = text(t1_value);
+    			circle2 = svg_element("circle");
+    			text2 = svg_element("text");
+    			t2 = text(t2_value);
+    			attr_dev(circle0, "class", "circle-line circle-mrre svelte-2vz4cw");
+    			attr_dev(circle0, "r", circle0_r_value = 10);
+    			attr_dev(circle0, "cx", circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle0, "cy", circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].mrre));
+    			add_location(circle0, file$1, 139, 16, 4395);
+    			attr_dev(text0, "x", text0_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11]);
+    			attr_dev(text0, "y", text0_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].mrre) - /*textMargin*/ ctx[11]);
+    			add_location(text0, file$1, 145, 16, 4653);
+    			attr_dev(circle1, "class", "circle-line circle-continuity svelte-2vz4cw");
+    			attr_dev(circle1, "r", circle1_r_value = 10);
+    			attr_dev(circle1, "cx", circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle1, "cy", circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].continuity));
+    			add_location(circle1, file$1, 146, 16, 4759);
+    			attr_dev(text1, "x", text1_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11]);
+    			attr_dev(text1, "y", text1_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].continuity) - /*textMargin*/ ctx[11]);
+    			add_location(text1, file$1, 152, 16, 5029);
+    			attr_dev(circle2, "class", "circle-line circle-trust svelte-2vz4cw");
+    			attr_dev(circle2, "r", circle2_r_value = 10);
+    			attr_dev(circle2, "cx", circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle2, "cy", circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].trust));
+    			add_location(circle2, file$1, 153, 16, 5147);
+    			attr_dev(text2, "x", text2_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11]);
+    			attr_dev(text2, "y", text2_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].trust) - /*textMargin*/ ctx[11]);
+    			add_location(text2, file$1, 159, 16, 5407);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, rect, anchor);
+    			insert_dev(target, circle0, anchor);
+    			insert_dev(target, text0, anchor);
+    			append_dev(text0, t0);
+    			insert_dev(target, circle1, anchor);
+    			insert_dev(target, text1, anchor);
+    			append_dev(text1, t1);
+    			insert_dev(target, circle2, anchor);
+    			insert_dev(target, text2, anchor);
+    			append_dev(text2, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(rect, "dblclick", dblclick_handler, false, false, false);
+    				dispose = [
+    					listen_dev(circle0, "mouseout", mouseout_handler, false, false, false),
+    					listen_dev(circle1, "mouseout", mouseout_handler_1, false, false, false),
+    					listen_dev(circle2, "mouseout", mouseout_handler_2, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			set_svg_attributes(rect, rect_data = get_spread_update(rect_levels, [dirty & /*rects*/ 2 && /*r*/ ctx[18]]));
+
+    			if (dirty[0] & /*xScale*/ 16 && circle0_cx_value !== (circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle0, "cx", circle0_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle0_cy_value !== (circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].mrre))) {
+    				attr_dev(circle0, "cy", circle0_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && text0_x_value !== (text0_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11])) {
+    				attr_dev(text0, "x", text0_x_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && text0_y_value !== (text0_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].mrre) - /*textMargin*/ ctx[11])) {
+    				attr_dev(text0, "y", text0_y_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle1_cx_value !== (circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle1, "cx", circle1_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle1_cy_value !== (circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].continuity))) {
+    				attr_dev(circle1, "cy", circle1_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && text1_x_value !== (text1_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11])) {
+    				attr_dev(text1, "x", text1_x_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && text1_y_value !== (text1_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].continuity) - /*textMargin*/ ctx[11])) {
+    				attr_dev(text1, "y", text1_y_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle2_cx_value !== (circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle2, "cx", circle2_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle2_cy_value !== (circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].trust))) {
+    				attr_dev(circle2, "cy", circle2_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && text2_x_value !== (text2_x_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter) + /*textMargin*/ ctx[11])) {
+    				attr_dev(text2, "x", text2_x_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && text2_y_value !== (text2_y_value = /*yScale*/ ctx[5](/*d*/ ctx[28].trust) - /*textMargin*/ ctx[11])) {
+    				attr_dev(text2, "y", text2_y_value);
+    			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(rect);
+    			if (detaching) detach_dev(circle0);
+    			if (detaching) detach_dev(text0);
+    			if (detaching) detach_dev(circle1);
+    			if (detaching) detach_dev(text1);
+    			if (detaching) detach_dev(circle2);
+    			if (detaching) detach_dev(text2);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$1.name,
+    		type: "else",
+    		source: "(139:12) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (120:12) {#if !hs || i != targetIndex}
+    function create_if_block$1(ctx) {
+    	let circle0;
+    	let circle0_cx_value;
+    	let circle0_cy_value;
+    	let circle1;
+    	let circle1_cx_value;
+    	let circle1_cy_value;
+    	let circle2;
+    	let circle2_cx_value;
+    	let circle2_cy_value;
+    	let mounted;
+    	let dispose;
+
+    	function mouseover_handler(...args) {
+    		return /*mouseover_handler*/ ctx[17](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	function mouseover_handler_1(...args) {
+    		return /*mouseover_handler_1*/ ctx[18](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	function mouseover_handler_2(...args) {
+    		return /*mouseover_handler_2*/ ctx[19](/*d*/ ctx[28], /*i*/ ctx[30], ...args);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			circle0 = svg_element("circle");
+    			circle1 = svg_element("circle");
+    			circle2 = svg_element("circle");
+    			attr_dev(circle0, "class", "circle-line circle-mrre svelte-2vz4cw");
+    			attr_dev(circle0, "r", /*r*/ ctx[10]);
+    			attr_dev(circle0, "cx", circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle0, "cy", circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].mrre));
+    			add_location(circle0, file$1, 120, 16, 3596);
+    			attr_dev(circle1, "class", "circle-line circle-continuity svelte-2vz4cw");
+    			attr_dev(circle1, "r", /*r*/ ctx[10]);
+    			attr_dev(circle1, "cx", circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle1, "cy", circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].continuity));
+    			add_location(circle1, file$1, 126, 16, 3851);
+    			attr_dev(circle2, "class", "circle-line circle-trust svelte-2vz4cw");
+    			attr_dev(circle2, "r", /*r*/ ctx[10]);
+    			attr_dev(circle2, "cx", circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter));
+    			attr_dev(circle2, "cy", circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].trust));
+    			add_location(circle2, file$1, 132, 16, 4118);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, circle0, anchor);
+    			insert_dev(target, circle1, anchor);
+    			insert_dev(target, circle2, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(circle0, "mouseover", mouseover_handler, false, false, false),
+    					listen_dev(circle1, "mouseover", mouseover_handler_1, false, false, false),
+    					listen_dev(circle2, "mouseover", mouseover_handler_2, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty[0] & /*xScale*/ 16 && circle0_cx_value !== (circle0_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle0, "cx", circle0_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle0_cy_value !== (circle0_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].mrre))) {
+    				attr_dev(circle0, "cy", circle0_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle1_cx_value !== (circle1_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle1, "cx", circle1_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle1_cy_value !== (circle1_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].continuity))) {
+    				attr_dev(circle1, "cy", circle1_cy_value);
+    			}
+
+    			if (dirty[0] & /*xScale*/ 16 && circle2_cx_value !== (circle2_cx_value = /*xScale*/ ctx[4](/*d*/ ctx[28].iter))) {
+    				attr_dev(circle2, "cx", circle2_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 32 && circle2_cy_value !== (circle2_cy_value = /*yScale*/ ctx[5](/*d*/ ctx[28].trust))) {
+    				attr_dev(circle2, "cy", circle2_cy_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(circle0);
+    			if (detaching) detach_dev(circle1);
+    			if (detaching) detach_dev(circle2);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(120:12) {#if !hs || i != targetIndex}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (119:8) {#each data as d, i}
+    function create_each_block$1(ctx) {
+    	let if_block_anchor;
+
+    	function select_block_type(ctx, dirty) {
+    		if (!/*hs*/ ctx[0] || /*i*/ ctx[30] != /*targetIndex*/ ctx[1]) return create_if_block$1;
+    		return create_else_block$1;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
 
@@ -20099,7 +20891,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(113:12) {#each rects as r, i}",
+    		source: "(119:8) {#each data as d, i}",
     		ctx
     	});
 
@@ -20107,15 +20899,44 @@ var app = (function () {
     }
 
     function create_fragment$1(ctx) {
-    	let button;
-    	let t1;
     	let div;
     	let svg;
-    	let g;
-    	let g_transform_value;
-    	let mounted;
-    	let dispose;
-    	let each_value = /*rects*/ ctx[1];
+    	let g0;
+    	let g0_transform_value;
+    	let g1;
+    	let path0;
+    	let path1;
+    	let path2_1;
+    	let text_1;
+    	let t;
+    	let text_1_x_value;
+    	let each2_anchor;
+    	let div_resize_listener;
+    	let each_value_3 = /*yTicks*/ ctx[13];
+    	validate_each_argument(each_value_3);
+    	let each_blocks_3 = [];
+
+    	for (let i = 0; i < each_value_3.length; i += 1) {
+    		each_blocks_3[i] = create_each_block_3$1(get_each_context_3$1(ctx, each_value_3, i));
+    	}
+
+    	let each_value_2 = /*xTicks*/ ctx[14];
+    	validate_each_argument(each_value_2);
+    	let each_blocks_2 = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks_2[i] = create_each_block_2$1(get_each_context_2$1(ctx, each_value_2, i));
+    	}
+
+    	let each_value_1 = /*measures*/ ctx[9];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
+    	}
+
+    	let each_value = data$1;
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -20125,51 +20946,191 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			button = element("button");
-    			button.textContent = "update";
-    			t1 = space();
     			div = element("div");
     			svg = svg_element("svg");
-    			g = svg_element("g");
+    			g0 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_3.length; i += 1) {
+    				each_blocks_3[i].c();
+    			}
+
+    			g1 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			path0 = svg_element("path");
+    			path1 = svg_element("path");
+    			path2_1 = svg_element("path");
+    			text_1 = svg_element("text");
+    			t = text("Iteration #");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			each2_anchor = empty();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			add_location(button, file$1, 108, 0, 2722);
-    			attr_dev(g, "width", /*width*/ ctx[5]);
-    			attr_dev(g, "height", /*height*/ ctx[6]);
-    			attr_dev(g, "transform", g_transform_value = translate$1(/*margin*/ ctx[4].left, /*margin*/ ctx[4].top));
-    			add_location(g, file$1, 111, 8, 2830);
-    			attr_dev(svg, "width", /*svgWidth*/ ctx[2]);
-    			attr_dev(svg, "height", /*svgHeight*/ ctx[3]);
-    			add_location(svg, file$1, 110, 4, 2780);
-    			add_location(div, file$1, 109, 0, 2770);
+    			attr_dev(g0, "class", "axis y-axis");
+    			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[12].top + ")");
+    			add_location(g0, file$1, 78, 2, 2059);
+    			attr_dev(g1, "class", "axis x-axis svelte-2vz4cw");
+    			add_location(g1, file$1, 89, 2, 2420);
+    			attr_dev(path0, "class", "path-line path-line-mrre svelte-2vz4cw");
+    			attr_dev(path0, "d", /*path*/ ctx[6]);
+    			add_location(path0, file$1, 100, 8, 2815);
+    			attr_dev(path1, "class", "path-line path-line-continuity svelte-2vz4cw");
+    			attr_dev(path1, "d", /*path2*/ ctx[7]);
+    			add_location(path1, file$1, 101, 8, 2879);
+    			attr_dev(path2_1, "class", "path-line path-line-trust svelte-2vz4cw");
+    			attr_dev(path2_1, "d", /*path3*/ ctx[8]);
+    			add_location(path2_1, file$1, 102, 8, 2950);
+    			attr_dev(text_1, "x", text_1_x_value = (/*width*/ ctx[2] - /*margin*/ ctx[12].left) / 2);
+    			attr_dev(text_1, "y", /*height*/ ctx[3]);
+    			attr_dev(text_1, "font-size", "12px");
+    			add_location(text_1, file$1, 105, 8, 3045);
+    			attr_dev(svg, "class", "svelte-2vz4cw");
+    			add_location(svg, file$1, 76, 1, 2033);
+    			attr_dev(div, "class", "chart svelte-2vz4cw");
+    			add_render_callback(() => /*div_elementresize_handler*/ ctx[23].call(div));
+    			add_location(div, file$1, 75, 0, 1960);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    			insert_dev(target, t1, anchor);
     			insert_dev(target, div, anchor);
     			append_dev(div, svg);
-    			append_dev(svg, g);
+    			append_dev(svg, g0);
+
+    			for (let i = 0; i < each_blocks_3.length; i += 1) {
+    				each_blocks_3[i].m(g0, null);
+    			}
+
+    			append_dev(svg, g1);
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].m(g1, null);
+    			}
+
+    			append_dev(svg, path0);
+    			append_dev(svg, path1);
+    			append_dev(svg, path2_1);
+    			append_dev(svg, text_1);
+    			append_dev(text_1, t);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(svg, null);
+    			}
+
+    			append_dev(svg, each2_anchor);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(g, null);
+    				each_blocks[i].m(svg, null);
     			}
 
-    			/*g_binding*/ ctx[10](g);
-
-    			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*handleUpdate*/ ctx[7], false, false, false);
-    				mounted = true;
-    			}
+    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[23].bind(div));
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*rects, barclick*/ 258) {
-    				each_value = /*rects*/ ctx[1];
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*yTicks, yScale, margin*/ 12320) {
+    				each_value_3 = /*yTicks*/ ctx[13];
+    				validate_each_argument(each_value_3);
+    				let i;
+
+    				for (i = 0; i < each_value_3.length; i += 1) {
+    					const child_ctx = get_each_context_3$1(ctx, each_value_3, i);
+
+    					if (each_blocks_3[i]) {
+    						each_blocks_3[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_3[i] = create_each_block_3$1(child_ctx);
+    						each_blocks_3[i].c();
+    						each_blocks_3[i].m(g0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_3.length; i += 1) {
+    					each_blocks_3[i].d(1);
+    				}
+
+    				each_blocks_3.length = each_value_3.length;
+    			}
+
+    			if (dirty[0] & /*xTicks, xScale, height, margin, width*/ 20508) {
+    				each_value_2 = /*xTicks*/ ctx[14];
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2$1(ctx, each_value_2, i);
+
+    					if (each_blocks_2[i]) {
+    						each_blocks_2[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_2[i] = create_each_block_2$1(child_ctx);
+    						each_blocks_2[i].c();
+    						each_blocks_2[i].m(g1, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_2.length; i += 1) {
+    					each_blocks_2[i].d(1);
+    				}
+
+    				each_blocks_2.length = each_value_2.length;
+    			}
+
+    			if (dirty[0] & /*path*/ 64) {
+    				attr_dev(path0, "d", /*path*/ ctx[6]);
+    			}
+
+    			if (dirty[0] & /*path2*/ 128) {
+    				attr_dev(path1, "d", /*path2*/ ctx[7]);
+    			}
+
+    			if (dirty[0] & /*path3*/ 256) {
+    				attr_dev(path2_1, "d", /*path3*/ ctx[8]);
+    			}
+
+    			if (dirty[0] & /*width*/ 4 && text_1_x_value !== (text_1_x_value = (/*width*/ ctx[2] - /*margin*/ ctx[12].left) / 2)) {
+    				attr_dev(text_1, "x", text_1_x_value);
+    			}
+
+    			if (dirty[0] & /*height*/ 8) {
+    				attr_dev(text_1, "y", /*height*/ ctx[3]);
+    			}
+
+    			if (dirty[0] & /*width, measures, r*/ 1540) {
+    				each_value_1 = /*measures*/ ctx[9];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$1(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(svg, each2_anchor);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty[0] & /*r, xScale, yScale, hoverState, hs, targetIndex, textMargin, hoverStateOut*/ 101427) {
+    				each_value = data$1;
     				validate_each_argument(each_value);
     				let i;
 
@@ -20181,7 +21142,7 @@ var app = (function () {
     					} else {
     						each_blocks[i] = create_each_block$1(child_ctx);
     						each_blocks[i].c();
-    						each_blocks[i].m(g, null);
+    						each_blocks[i].m(svg, null);
     					}
     				}
 
@@ -20195,13 +21156,12 @@ var app = (function () {
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks_3, detaching);
+    			destroy_each(each_blocks_2, detaching);
+    			destroy_each(each_blocks_1, detaching);
     			destroy_each(each_blocks, detaching);
-    			/*g_binding*/ ctx[10](null);
-    			mounted = false;
-    			dispose();
+    			div_resize_listener();
     		}
     	};
 
@@ -20216,178 +21176,1256 @@ var app = (function () {
     	return block;
     }
 
+    const svgWidth$1 = 550;
+    const svgHeight$1 = 550;
+
     function translate$1(x, y) {
     	return "translate(" + x + "," + y + ")";
     }
 
+    // $: dot = data.map(d => `${xScale(d.iter)}, ${yScale(d.mrre)}`);
+    // $: area = `${path}L${xScale(maxX)},${yScale(0)}L${xScale(minX)},${yScale(0)}Z`;
+    function formatMobile$1(tick) {
+    	return "'" + tick % 100;
+    }
+
     function instance$1($$self, $$props, $$invalidate) {
-    	let svgWidth = 550;
-    	let svgHeight = 550;
-
-    	let margin = {
-    		top: 30,
-    		right: 10,
-    		bottom: 20,
-    		left: 40,
-    		mid: 10
-    	};
-
-    	let width = svgWidth - margin.left - margin.right;
-    	let height = svgHeight - margin.top - margin.bottom;
-
-    	//-------------------------------------------------------------bar
-    	let bar_domain = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-
-    	let bar_data = [
-    		{ name: "A", value: 10, color: "#FF0000" },
-    		{ name: "B", value: 10, color: "#FF8000" },
-    		{ name: "C", value: 10, color: "#FFFF00" },
-    		{ name: "D", value: 10, color: "#80FF00" },
-    		{ name: "E", value: 10, color: "#00FFFF" },
-    		{ name: "F", value: 10, color: "#0080FF" },
-    		{ name: "G", value: 10, color: "#0000FF" },
-    		{ name: "H", value: 10, color: "#8000FF" },
-    		{ name: "I", value: 10, color: "#FF00FF" },
-    		{ name: "J", value: 10, color: "#848484" }
-    	];
-
-    	bar_data.forEach(function (d) {
-    		d.value = Math.random() * 100;
-    	});
-
+    	console.log(data$1);
+    	let measures = ["mrre", "continuity", "trust"];
+    	let r = 5;
+    	let textMargin = 7;
+    	let legendMargin;
     	let el;
-    	let dx = band().domain(bar_domain).range([0, width]);
-    	let dy = linear$2().domain([0, 100]).range([height, 0]);
-    	let dxAxis = axisBottom(dx);
-    	let dyAxis = axisLeft(dy);
-    	let colorScale = ordinal(category10);
+    	let hs = false;
+    	let targetIndex = -1;
+    	const margin = { top: 20, right: 15, bottom: 30, left: 25 };
+    	let width = svgWidth$1 - margin.left - margin.right;
+    	let height = svgHeight$1 - margin.top - margin.bottom;
 
-    	function handleUpdate() {
-    		bar_data.forEach(function (d) {
-    			d.value = Math.random() * 101;
-    		});
-
-    		$$invalidate(11, bar_data);
-    	}
-
-    	let rects;
-
-    	function barclick(i) {
-    		console.log(i);
-    		bar_data.splice(i, 1);
-    		$$invalidate(11, bar_data);
-    	}
-
-    	onMount(() => {
-    		console.log("mount");
-    		select(el).append("g").attr("transform", translate$1(0, width)).call(dxAxis);
-    		select(el).append("g").call(dyAxis);
+    	data$1.forEach(d => {
+    		d.iter = +d.iter;
+    		d.mrre = +d.mrre;
+    		d.trust = +d.trust;
     	});
+
+    	const yTicks = [0, 0.2, 0.4, 0.6, 0.8, 1];
+    	const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+    	console.log(data$1[0]);
+
+    	function hoverState(e, d, i) {
+    		$$invalidate(0, hs = true);
+    		$$invalidate(1, targetIndex = i);
+    	}
+
+    	function hoverStateOut(e, d, i) {
+    		$$invalidate(0, hs = false);
+    		$$invalidate(1, targetIndex = -1);
+    	}
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Barchart> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Linechart2> was created with unknown prop '${key}'`);
     	});
 
     	let { $$slots = {}, $$scope } = $$props;
-    	validate_slots("Barchart", $$slots, []);
-    	const dblclick_handler = i => barclick(i);
+    	validate_slots("Linechart2", $$slots, []);
+    	const mouseover_handler = (d, i, e) => hoverState(e, d, i);
+    	const mouseover_handler_1 = (d, i, e) => hoverState(e, d, i);
+    	const mouseover_handler_2 = (d, i, e) => hoverState(e, d, i);
+    	const mouseout_handler = (d, i, e) => hoverStateOut();
+    	const mouseout_handler_1 = (d, i, e) => hoverStateOut();
+    	const mouseout_handler_2 = (d, i, e) => hoverStateOut();
 
-    	function g_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
-    			el = $$value;
-    			$$invalidate(0, el);
-    		});
+    	function div_elementresize_handler() {
+    		width = this.clientWidth;
+    		height = this.clientHeight;
+    		$$invalidate(2, width);
+    		$$invalidate(3, height);
     	}
 
     	$$self.$capture_state = () => ({
+    		d3,
     		onMount,
     		beforeUpdate,
     		afterUpdate,
-    		d3,
+    		data: data$1,
     		translate: translate$1,
-    		svgWidth,
-    		svgHeight,
+    		measures,
+    		r,
+    		textMargin,
+    		legendMargin,
+    		el,
+    		hs,
+    		targetIndex,
+    		svgWidth: svgWidth$1,
+    		svgHeight: svgHeight$1,
     		margin,
     		width,
     		height,
-    		bar_domain,
-    		bar_data,
-    		el,
-    		dx,
-    		dy,
-    		dxAxis,
-    		dyAxis,
-    		colorScale,
-    		handleUpdate,
-    		rects,
-    		barclick
+    		yTicks,
+    		xTicks,
+    		formatMobile: formatMobile$1,
+    		hoverState,
+    		hoverStateOut,
+    		xScale,
+    		minX,
+    		maxX,
+    		yScale,
+    		path,
+    		path2,
+    		path3
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("svgWidth" in $$props) $$invalidate(2, svgWidth = $$props.svgWidth);
-    		if ("svgHeight" in $$props) $$invalidate(3, svgHeight = $$props.svgHeight);
-    		if ("margin" in $$props) $$invalidate(4, margin = $$props.margin);
-    		if ("width" in $$props) $$invalidate(5, width = $$props.width);
-    		if ("height" in $$props) $$invalidate(6, height = $$props.height);
-    		if ("bar_domain" in $$props) bar_domain = $$props.bar_domain;
-    		if ("bar_data" in $$props) $$invalidate(11, bar_data = $$props.bar_data);
-    		if ("el" in $$props) $$invalidate(0, el = $$props.el);
-    		if ("dx" in $$props) dx = $$props.dx;
-    		if ("dy" in $$props) $$invalidate(14, dy = $$props.dy);
-    		if ("dxAxis" in $$props) dxAxis = $$props.dxAxis;
-    		if ("dyAxis" in $$props) dyAxis = $$props.dyAxis;
-    		if ("colorScale" in $$props) $$invalidate(17, colorScale = $$props.colorScale);
-    		if ("rects" in $$props) $$invalidate(1, rects = $$props.rects);
+    		if ("measures" in $$props) $$invalidate(9, measures = $$props.measures);
+    		if ("r" in $$props) $$invalidate(10, r = $$props.r);
+    		if ("textMargin" in $$props) $$invalidate(11, textMargin = $$props.textMargin);
+    		if ("legendMargin" in $$props) legendMargin = $$props.legendMargin;
+    		if ("el" in $$props) el = $$props.el;
+    		if ("hs" in $$props) $$invalidate(0, hs = $$props.hs);
+    		if ("targetIndex" in $$props) $$invalidate(1, targetIndex = $$props.targetIndex);
+    		if ("width" in $$props) $$invalidate(2, width = $$props.width);
+    		if ("height" in $$props) $$invalidate(3, height = $$props.height);
+    		if ("xScale" in $$props) $$invalidate(4, xScale = $$props.xScale);
+    		if ("minX" in $$props) $$invalidate(24, minX = $$props.minX);
+    		if ("maxX" in $$props) $$invalidate(25, maxX = $$props.maxX);
+    		if ("yScale" in $$props) $$invalidate(5, yScale = $$props.yScale);
+    		if ("path" in $$props) $$invalidate(6, path = $$props.path);
+    		if ("path2" in $$props) $$invalidate(7, path2 = $$props.path2);
+    		if ("path3" in $$props) $$invalidate(8, path3 = $$props.path3);
     	};
+
+    	let xScale;
+    	let yScale;
+    	let minX;
+    	let maxX;
+    	let path;
+    	let path2;
+    	let path3;
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*bar_data*/ 2048) {
-    			 {
-    				$$invalidate(1, rects = bar_data.map((bar, i) => {
-    					return {
-    						fill: colorScale(i),
-    						width: 40,
-    						height: dy(bar.value),
-    						x: (40 + margin.mid) * i,
-    						y: height - dy(bar.value),
-    						cursor: "pointer"
-    					};
-    				}));
-    			}
+    		if ($$self.$$.dirty[0] & /*minX, maxX, width*/ 50331652) {
+    			 $$invalidate(4, xScale = linear$2().domain([minX, maxX]).range([margin.left, width - margin.right]));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*height*/ 8) {
+    			 $$invalidate(5, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 48) {
+    			 $$invalidate(6, path = `M${data$1.map(d => `${xScale(d.iter)}, ${yScale(d.mrre)}`).join("L")}`);
+    		}
+
+    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 48) {
+    			 $$invalidate(7, path2 = `M${data$1.map(d => `${xScale(d.iter)}, ${yScale(d.continuity)}`).join("L")}`);
+    		}
+
+    		if ($$self.$$.dirty[0] & /*xScale, yScale*/ 48) {
+    			 $$invalidate(8, path3 = `M${data$1.map(d => `${xScale(d.iter)}, ${yScale(d.trust)}`).join("L")}`);
     		}
     	};
 
+    	 $$invalidate(24, minX = min(data$1, d => d.iter));
+    	 $$invalidate(25, maxX = max(data$1, d => d.iter));
+
     	return [
-    		el,
-    		rects,
-    		svgWidth,
-    		svgHeight,
-    		margin,
+    		hs,
+    		targetIndex,
     		width,
     		height,
-    		handleUpdate,
-    		barclick,
-    		dblclick_handler,
-    		g_binding
+    		xScale,
+    		yScale,
+    		path,
+    		path2,
+    		path3,
+    		measures,
+    		r,
+    		textMargin,
+    		margin,
+    		yTicks,
+    		xTicks,
+    		hoverState,
+    		hoverStateOut,
+    		mouseover_handler,
+    		mouseover_handler_1,
+    		mouseover_handler_2,
+    		mouseout_handler,
+    		mouseout_handler_1,
+    		mouseout_handler_2,
+    		div_elementresize_handler
     	];
     }
 
-    class Barchart extends SvelteComponentDev {
+    class Linechart2 extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {}, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Barchart",
+    			tagName: "Linechart2",
     			options,
     			id: create_fragment$1.name
+    		});
+    	}
+    }
+
+    /* src/Scatterplot.svelte generated by Svelte v3.24.1 */
+    const file$2 = "src/Scatterplot.svelte";
+
+    function get_each_context$2(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[17] = list[i];
+    	child_ctx[19] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1$2(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[20] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_2$2(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[20] = list[i];
+    	return child_ctx;
+    }
+
+    // (70:3) {#each yTicks as tick}
+    function create_each_block_2$2(ctx) {
+    	let g;
+    	let line;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[20] + "";
+    	let t;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "x2", "100%");
+    			attr_dev(line, "class", "svelte-1vbxcn7");
+    			add_location(line, file$2, 71, 5, 2202);
+    			attr_dev(text_1, "y", "-4");
+    			attr_dev(text_1, "class", "svelte-1vbxcn7");
+    			add_location(text_1, file$2, 72, 5, 2231);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[20] + " svelte-1vbxcn7");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[20]) - /*margin*/ ctx[6].bottom / 2) + ")");
+    			add_location(g, file$2, 70, 4, 2107);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[20]) - /*margin*/ ctx[6].bottom / 2) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2$2.name,
+    		type: "each",
+    		source: "(70:3) {#each yTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (80:3) {#each xTicks as tick}
+    function create_each_block_1$2(ctx) {
+    	let g;
+    	let line;
+    	let line_y__value;
+    	let line_y__value_1;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[20] + "";
+    	let t;
+    	let text_1_y_value;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "y1", line_y__value = "-" + /*height*/ ctx[1]);
+    			attr_dev(line, "y2", line_y__value_1 = "-" + /*margin*/ ctx[6].bottom);
+    			attr_dev(line, "x1", "0");
+    			attr_dev(line, "x2", "0");
+    			attr_dev(line, "class", "svelte-1vbxcn7");
+    			add_location(line, file$2, 81, 5, 2460);
+    			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[6].bottom - 10));
+    			attr_dev(text_1, "class", "svelte-1vbxcn7");
+    			add_location(text_1, file$2, 82, 5, 2530);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[20] + " svelte-1vbxcn7");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[20]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")");
+    			add_location(g, file$2, 80, 4, 2360);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*height*/ 2 && line_y__value !== (line_y__value = "-" + /*height*/ ctx[1])) {
+    				attr_dev(line, "y1", line_y__value);
+    			}
+
+    			if (dirty & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[20]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$2.name,
+    		type: "each",
+    		source: "(80:3) {#each xTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (88:8) {#each data as d, i}
+    function create_each_block$2(ctx) {
+    	let circle;
+    	let circle_cx_value;
+    	let circle_cy_value;
+    	let circle_fill_value;
+
+    	const block = {
+    		c: function create() {
+    			circle = svg_element("circle");
+    			attr_dev(circle, "class", "circle-line svelte-1vbxcn7");
+    			attr_dev(circle, "r", /*r*/ ctx[5]);
+    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[17][0]));
+    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[17][1]));
+    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[9](/*d*/ ctx[17][2]));
+    			add_location(circle, file$2, 88, 12, 2643);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, circle, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[17][0]))) {
+    				attr_dev(circle, "cx", circle_cx_value);
+    			}
+
+    			if (dirty & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[17][1]))) {
+    				attr_dev(circle, "cy", circle_cy_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(circle);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$2.name,
+    		type: "each",
+    		source: "(88:8) {#each data as d, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$2(ctx) {
+    	let div;
+    	let svg;
+    	let g0;
+    	let g0_transform_value;
+    	let g1;
+    	let div_resize_listener;
+    	let each_value_2 = /*yTicks*/ ctx[8];
+    	validate_each_argument(each_value_2);
+    	let each_blocks_2 = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks_2[i] = create_each_block_2$2(get_each_context_2$2(ctx, each_value_2, i));
+    	}
+
+    	let each_value_1 = /*xTicks*/ ctx[7];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$2(get_each_context_1$2(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*data*/ ctx[4];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			svg = svg_element("svg");
+    			g0 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			g1 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(g0, "class", "axis y-axis");
+    			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[6].top + ")");
+    			add_location(g0, file$2, 68, 2, 2014);
+    			attr_dev(g1, "class", "axis x-axis svelte-1vbxcn7");
+    			add_location(g1, file$2, 78, 2, 2306);
+    			attr_dev(svg, "class", "svelte-1vbxcn7");
+    			add_location(svg, file$2, 66, 1, 1988);
+    			attr_dev(div, "class", "chart svelte-1vbxcn7");
+    			add_render_callback(() => /*div_elementresize_handler*/ ctx[10].call(div));
+    			add_location(div, file$2, 65, 0, 1915);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, svg);
+    			append_dev(svg, g0);
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].m(g0, null);
+    			}
+
+    			append_dev(svg, g1);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(g1, null);
+    			}
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(svg, null);
+    			}
+
+    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[10].bind(div));
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*yTicks, yScale, margin*/ 328) {
+    				each_value_2 = /*yTicks*/ ctx[8];
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2$2(ctx, each_value_2, i);
+
+    					if (each_blocks_2[i]) {
+    						each_blocks_2[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_2[i] = create_each_block_2$2(child_ctx);
+    						each_blocks_2[i].c();
+    						each_blocks_2[i].m(g0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_2.length; i += 1) {
+    					each_blocks_2[i].d(1);
+    				}
+
+    				each_blocks_2.length = each_value_2.length;
+    			}
+
+    			if (dirty & /*xTicks, xScale, height, margin*/ 198) {
+    				each_value_1 = /*xTicks*/ ctx[7];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$2(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$2(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(g1, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*r, xScale, data, yScale, colorScale*/ 572) {
+    				each_value = /*data*/ ctx[4];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$2(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$2(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(svg, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks_2, detaching);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			div_resize_listener();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$2.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    const svgWidth$2 = 600;
+    const svgHeight$2 = 600;
+
+    function translate$2(x, y) {
+    	return "translate(" + x + "," + y + ")";
+    }
+
+    function read_csv(path) {
+    	let request = new XMLHttpRequest();
+    	request.open("GET", path, false);
+    	request.send(null);
+    	let csvData = new Array();
+    	let jsonObject = request.responseText.split(/\r?\n|\r/);
+
+    	for (let i = 0; i < jsonObject.length; i++) {
+    		csvData.push(jsonObject[i].split(","));
+    	}
+
+    	return csvData;
+    }
+
+    function instance$2($$self, $$props, $$invalidate) {
+    	let data = read_csv("umato-small.csv");
+    	let el;
+    	let r = 5;
+    	let hs = false;
+    	let targetIndex = -1;
+    	const margin = { top: 30, right: 15, bottom: 30, left: 25 };
+    	let width = svgWidth$2 - margin.left - margin.right;
+    	let height = svgHeight$2 - margin.top - margin.bottom;
+
+    	data.forEach(d => {
+    		d[0] = +d[0];
+    		d[1] = +d[1];
+    		d[2] = +d[2];
+    	});
+
+    	const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    	const yTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    	const colorDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    	// const colorScale = d3.scaleLinear()
+    	//     .domain(d3.extent(colorDomain))
+    	//     .range(["black", "red"]);
+    	const colorScale = ordinal().domain(extent(colorDomain)).range([
+    		"#4e79a7",
+    		"#f28e2c",
+    		"#e15759",
+    		"#76b7b2",
+    		"#59a14f",
+    		"#edc949",
+    		"#af7aa1",
+    		"#ff9da7",
+    		"#9c755f",
+    		"#bab0ab"
+    	]);
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Scatterplot> was created with unknown prop '${key}'`);
+    	});
+
+    	let { $$slots = {}, $$scope } = $$props;
+    	validate_slots("Scatterplot", $$slots, []);
+
+    	function div_elementresize_handler() {
+    		width = this.clientWidth;
+    		height = this.clientHeight;
+    		$$invalidate(0, width);
+    		$$invalidate(1, height);
+    	}
+
+    	$$self.$capture_state = () => ({
+    		d3,
+    		translate: translate$2,
+    		read_csv,
+    		data,
+    		el,
+    		r,
+    		hs,
+    		targetIndex,
+    		svgWidth: svgWidth$2,
+    		svgHeight: svgHeight$2,
+    		margin,
+    		width,
+    		height,
+    		xTicks,
+    		yTicks,
+    		colorDomain,
+    		colorScale,
+    		xScale,
+    		yScale,
+    		minX,
+    		maxX
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("data" in $$props) $$invalidate(4, data = $$props.data);
+    		if ("el" in $$props) el = $$props.el;
+    		if ("r" in $$props) $$invalidate(5, r = $$props.r);
+    		if ("hs" in $$props) hs = $$props.hs;
+    		if ("targetIndex" in $$props) targetIndex = $$props.targetIndex;
+    		if ("width" in $$props) $$invalidate(0, width = $$props.width);
+    		if ("height" in $$props) $$invalidate(1, height = $$props.height);
+    		if ("xScale" in $$props) $$invalidate(2, xScale = $$props.xScale);
+    		if ("yScale" in $$props) $$invalidate(3, yScale = $$props.yScale);
+    		if ("minX" in $$props) minX = $$props.minX;
+    		if ("maxX" in $$props) maxX = $$props.maxX;
+    	};
+
+    	let xScale;
+    	let yScale;
+    	let minX;
+    	let maxX;
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*width*/ 1) {
+    			 $$invalidate(2, xScale = linear$2().domain([Math.min.apply(null, xTicks), Math.max.apply(null, xTicks)]).range([margin.left, width - margin.right]));
+    		}
+
+    		if ($$self.$$.dirty & /*height*/ 2) {
+    			 $$invalidate(3, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
+    		}
+    	};
+
+    	 minX = min(data, d => d.iter);
+    	 maxX = max(data, d => d.iter);
+
+    	return [
+    		width,
+    		height,
+    		xScale,
+    		yScale,
+    		data,
+    		r,
+    		margin,
+    		xTicks,
+    		yTicks,
+    		colorScale,
+    		div_elementresize_handler
+    	];
+    }
+
+    class Scatterplot extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Scatterplot",
+    			options,
+    			id: create_fragment$2.name
+    		});
+    	}
+    }
+
+    /* src/Scatterplot2.svelte generated by Svelte v3.24.1 */
+    const file$3 = "src/Scatterplot2.svelte";
+
+    function get_each_context$3(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[18] = list[i];
+    	child_ctx[20] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1$3(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[21] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_2$3(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[21] = list[i];
+    	return child_ctx;
+    }
+
+    // (72:3) {#each yTicks as tick}
+    function create_each_block_2$3(ctx) {
+    	let g;
+    	let line;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[21] + "";
+    	let t;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "x2", "100%");
+    			attr_dev(line, "class", "svelte-18uebyv");
+    			add_location(line, file$3, 73, 5, 2229);
+    			attr_dev(text_1, "y", "-4");
+    			attr_dev(text_1, "class", "svelte-18uebyv");
+    			add_location(text_1, file$3, 74, 5, 2258);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[21] + " svelte-18uebyv");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[21]) - /*margin*/ ctx[6].bottom / 2) + ")");
+    			add_location(g, file$3, 72, 4, 2134);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[21]) - /*margin*/ ctx[6].bottom / 2) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2$3.name,
+    		type: "each",
+    		source: "(72:3) {#each yTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (82:3) {#each xTicks as tick}
+    function create_each_block_1$3(ctx) {
+    	let g;
+    	let line;
+    	let line_y__value;
+    	let line_y__value_1;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[21] + "";
+    	let t;
+    	let text_1_y_value;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "y1", line_y__value = "-" + /*height*/ ctx[1]);
+    			attr_dev(line, "y2", line_y__value_1 = "-" + /*margin*/ ctx[6].bottom);
+    			attr_dev(line, "x1", "0");
+    			attr_dev(line, "x2", "0");
+    			attr_dev(line, "class", "svelte-18uebyv");
+    			add_location(line, file$3, 83, 5, 2487);
+    			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[6].bottom - 10));
+    			attr_dev(text_1, "class", "svelte-18uebyv");
+    			add_location(text_1, file$3, 84, 5, 2557);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[21] + " svelte-18uebyv");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[21]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")");
+    			add_location(g, file$3, 82, 4, 2387);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*height*/ 2 && line_y__value !== (line_y__value = "-" + /*height*/ ctx[1])) {
+    				attr_dev(line, "y1", line_y__value);
+    			}
+
+    			if (dirty & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[21]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$3.name,
+    		type: "each",
+    		source: "(82:3) {#each xTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (90:8) {#each data as d, i}
+    function create_each_block$3(ctx) {
+    	let circle;
+    	let circle_cx_value;
+    	let circle_cy_value;
+    	let circle_fill_value;
+
+    	const block = {
+    		c: function create() {
+    			circle = svg_element("circle");
+    			attr_dev(circle, "class", "circle-line svelte-18uebyv");
+    			attr_dev(circle, "r", /*r*/ ctx[5]);
+    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[18][0]));
+    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[18][1]));
+    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[9](/*d*/ ctx[18][2]));
+    			add_location(circle, file$3, 90, 12, 2670);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, circle, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[18][0]))) {
+    				attr_dev(circle, "cx", circle_cx_value);
+    			}
+
+    			if (dirty & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[18][1]))) {
+    				attr_dev(circle, "cy", circle_cy_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(circle);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$3.name,
+    		type: "each",
+    		source: "(90:8) {#each data as d, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$3(ctx) {
+    	let div;
+    	let svg;
+    	let g0;
+    	let g0_transform_value;
+    	let g1;
+    	let div_resize_listener;
+    	let each_value_2 = /*yTicks*/ ctx[8];
+    	validate_each_argument(each_value_2);
+    	let each_blocks_2 = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks_2[i] = create_each_block_2$3(get_each_context_2$3(ctx, each_value_2, i));
+    	}
+
+    	let each_value_1 = /*xTicks*/ ctx[7];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$3(get_each_context_1$3(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*data*/ ctx[4];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$3(get_each_context$3(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			svg = svg_element("svg");
+    			g0 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			g1 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(g0, "class", "axis y-axis");
+    			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[6].top + ")");
+    			add_location(g0, file$3, 70, 2, 2041);
+    			attr_dev(g1, "class", "axis x-axis svelte-18uebyv");
+    			add_location(g1, file$3, 80, 2, 2333);
+    			attr_dev(svg, "class", "svelte-18uebyv");
+    			add_location(svg, file$3, 68, 1, 2015);
+    			attr_dev(div, "class", "chart svelte-18uebyv");
+    			add_render_callback(() => /*div_elementresize_handler*/ ctx[10].call(div));
+    			add_location(div, file$3, 67, 0, 1942);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, svg);
+    			append_dev(svg, g0);
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].m(g0, null);
+    			}
+
+    			append_dev(svg, g1);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(g1, null);
+    			}
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(svg, null);
+    			}
+
+    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[10].bind(div));
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*yTicks, yScale, margin*/ 328) {
+    				each_value_2 = /*yTicks*/ ctx[8];
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2$3(ctx, each_value_2, i);
+
+    					if (each_blocks_2[i]) {
+    						each_blocks_2[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_2[i] = create_each_block_2$3(child_ctx);
+    						each_blocks_2[i].c();
+    						each_blocks_2[i].m(g0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_2.length; i += 1) {
+    					each_blocks_2[i].d(1);
+    				}
+
+    				each_blocks_2.length = each_value_2.length;
+    			}
+
+    			if (dirty & /*xTicks, xScale, height, margin*/ 198) {
+    				each_value_1 = /*xTicks*/ ctx[7];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$3(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$3(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(g1, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*r, xScale, data, yScale, colorScale*/ 572) {
+    				each_value = /*data*/ ctx[4];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$3(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$3(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(svg, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks_2, detaching);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			div_resize_listener();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$3.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    const svgWidth$3 = 600;
+    const svgHeight$3 = 600;
+
+    function translate$3(x, y) {
+    	return "translate(" + x + "," + y + ")";
+    }
+
+    function read_csv$1(path) {
+    	let request = new XMLHttpRequest();
+    	request.open("GET", path, false);
+    	request.send(null);
+    	let csvData = new Array();
+    	let jsonObject = request.responseText.split(/\r?\n|\r/);
+
+    	for (let i = 0; i < jsonObject.length; i++) {
+    		csvData.push(jsonObject[i].split(","));
+    	}
+
+    	return csvData;
+    }
+
+    function instance$3($$self, $$props, $$invalidate) {
+    	let data = read_csv$1("umato-large.csv");
+    	let r = 2.5;
+    	let textMargin = 7;
+    	let el;
+    	let hs = false;
+    	let targetIndex = -1;
+    	const margin = { top: 30, right: 15, bottom: 30, left: 25 };
+    	let width = svgWidth$3 - margin.left - margin.right;
+    	let height = svgHeight$3 - margin.top - margin.bottom;
+
+    	data.forEach(d => {
+    		d[0] = +d[0];
+    		d[1] = +d[1];
+    		d[2] = +d[2];
+    	});
+
+    	const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    	const yTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    	const colorDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    	// const colorScale = d3.scaleLinear()
+    	//     .domain(d3.extent(colorDomain))
+    	//     .range(["black", "red"]);
+    	const colorScale = ordinal().domain(extent(colorDomain)).range([
+    		"#4e79a7",
+    		"#f28e2c",
+    		"#e15759",
+    		"#76b7b2",
+    		"#59a14f",
+    		"#edc949",
+    		"#af7aa1",
+    		"#ff9da7",
+    		"#9c755f",
+    		"#bab0ab"
+    	]);
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Scatterplot2> was created with unknown prop '${key}'`);
+    	});
+
+    	let { $$slots = {}, $$scope } = $$props;
+    	validate_slots("Scatterplot2", $$slots, []);
+
+    	function div_elementresize_handler() {
+    		width = this.clientWidth;
+    		height = this.clientHeight;
+    		$$invalidate(0, width);
+    		$$invalidate(1, height);
+    	}
+
+    	$$self.$capture_state = () => ({
+    		d3,
+    		translate: translate$3,
+    		read_csv: read_csv$1,
+    		data,
+    		r,
+    		textMargin,
+    		el,
+    		hs,
+    		targetIndex,
+    		svgWidth: svgWidth$3,
+    		svgHeight: svgHeight$3,
+    		margin,
+    		width,
+    		height,
+    		xTicks,
+    		yTicks,
+    		colorDomain,
+    		colorScale,
+    		xScale,
+    		yScale,
+    		minX,
+    		maxX
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("data" in $$props) $$invalidate(4, data = $$props.data);
+    		if ("r" in $$props) $$invalidate(5, r = $$props.r);
+    		if ("textMargin" in $$props) textMargin = $$props.textMargin;
+    		if ("el" in $$props) el = $$props.el;
+    		if ("hs" in $$props) hs = $$props.hs;
+    		if ("targetIndex" in $$props) targetIndex = $$props.targetIndex;
+    		if ("width" in $$props) $$invalidate(0, width = $$props.width);
+    		if ("height" in $$props) $$invalidate(1, height = $$props.height);
+    		if ("xScale" in $$props) $$invalidate(2, xScale = $$props.xScale);
+    		if ("yScale" in $$props) $$invalidate(3, yScale = $$props.yScale);
+    		if ("minX" in $$props) minX = $$props.minX;
+    		if ("maxX" in $$props) maxX = $$props.maxX;
+    	};
+
+    	let xScale;
+    	let yScale;
+    	let minX;
+    	let maxX;
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*width*/ 1) {
+    			 $$invalidate(2, xScale = linear$2().domain([Math.min.apply(null, xTicks), Math.max.apply(null, xTicks)]).range([margin.left, width - margin.right]));
+    		}
+
+    		if ($$self.$$.dirty & /*height*/ 2) {
+    			 $$invalidate(3, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
+    		}
+    	};
+
+    	 minX = min(data, d => d.iter);
+    	 maxX = max(data, d => d.iter);
+
+    	return [
+    		width,
+    		height,
+    		xScale,
+    		yScale,
+    		data,
+    		r,
+    		margin,
+    		xTicks,
+    		yTicks,
+    		colorScale,
+    		div_elementresize_handler
+    	];
+    }
+
+    class Scatterplot2 extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Scatterplot2",
+    			options,
+    			id: create_fragment$3.name
     		});
     	}
     }
@@ -20395,15 +22433,15 @@ var app = (function () {
     /* src/App.svelte generated by Svelte v3.24.1 */
 
     const { Object: Object_1, console: console_1$2 } = globals;
-    const file$2 = "src/App.svelte";
+    const file$4 = "src/App.svelte";
 
-    function get_each_context$2(ctx, list, i) {
+    function get_each_context$4(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[34] = list[i];
     	return child_ctx;
     }
 
-    // (229:4) {:else}
+    // (231:4) {:else}
     function create_else_block_2(ctx) {
     	let button;
     	let h3;
@@ -20416,9 +22454,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for GLOBAL optimization (Click for RUN 🟢)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$2, 230, 6, 3927);
+    			add_location(h3, file$4, 232, 6, 4031);
     			attr_dev(button, "class", "button1 svelte-1b8xkh4");
-    			add_location(button, file$2, 229, 5, 3867);
+    			add_location(button, file$4, 231, 5, 3971);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -20441,14 +22479,14 @@ var app = (function () {
     		block,
     		id: create_else_block_2.name,
     		type: "else",
-    		source: "(229:4) {:else}",
+    		source: "(231:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (223:4) {#if globalCliked}
+    // (225:4) {#if globalCliked}
     function create_if_block_3(ctx) {
     	let button;
     	let h3;
@@ -20461,9 +22499,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for GLOBAL optimization (Click for STOP 🟥)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$2, 224, 6, 3744);
+    			add_location(h3, file$4, 226, 6, 3848);
     			attr_dev(button, "class", "button2 svelte-1b8xkh4");
-    			add_location(button, file$2, 223, 5, 3684);
+    			add_location(button, file$4, 225, 5, 3788);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -20486,14 +22524,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(223:4) {#if globalCliked}",
+    		source: "(225:4) {#if globalCliked}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (320:4) {:else}
+    // (322:4) {:else}
     function create_else_block_1(ctx) {
     	let button;
     	let h3;
@@ -20506,9 +22544,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for LOCAL optimization (Click for RUN 🟢)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$2, 321, 6, 6174);
+    			add_location(h3, file$4, 323, 6, 6278);
     			attr_dev(button, "class", "button1 svelte-1b8xkh4");
-    			add_location(button, file$2, 320, 5, 6115);
+    			add_location(button, file$4, 322, 5, 6219);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -20531,14 +22569,14 @@ var app = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(320:4) {:else}",
+    		source: "(322:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (310:4) {#if localCliked}
+    // (312:4) {#if localCliked}
     function create_if_block_2(ctx) {
     	let button;
     	let h3;
@@ -20551,9 +22589,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for LOCAL optimization (Click for STOP 🟥)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$2, 311, 6, 5895);
+    			add_location(h3, file$4, 313, 6, 5999);
     			attr_dev(button, "class", "button2 svelte-1b8xkh4");
-    			add_location(button, file$2, 310, 5, 5829);
+    			add_location(button, file$4, 312, 5, 5933);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -20576,15 +22614,15 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(310:4) {#if localCliked}",
+    		source: "(312:4) {#if localCliked}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (456:3) {#if showItems}
-    function create_if_block(ctx) {
+    // (454:3) {#if showItems}
+    function create_if_block$2(ctx) {
     	let each_1_anchor;
     	let current;
     	let each_value = /*items*/ ctx[12].slice(0, /*i*/ ctx[11]);
@@ -20592,7 +22630,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$4(get_each_context$4(ctx, each_value, i));
     	}
 
     	const out = i => transition_out(each_blocks[i], 1, 1, () => {
@@ -20622,13 +22660,13 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$2(ctx, each_value, i);
+    					const child_ctx = get_each_context$4(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     						transition_in(each_blocks[i], 1);
     					} else {
-    						each_blocks[i] = create_each_block$2(child_ctx);
+    						each_blocks[i] = create_each_block$4(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
@@ -20670,17 +22708,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
+    		id: create_if_block$2.name,
     		type: "if",
-    		source: "(456:3) {#if showItems}",
+    		source: "(454:3) {#if showItems}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (463:5) {:else}
-    function create_else_block(ctx) {
+    // (461:5) {:else}
+    function create_else_block$2(ctx) {
     	let div;
     	let t0_value = /*items*/ ctx[12].indexOf(/*item*/ ctx[34]) + "";
     	let t0;
@@ -20739,7 +22777,7 @@ var app = (function () {
     			t18 = text(t18_value);
     			t19 = space();
     			attr_dev(div, "class", "snapshot svelte-1b8xkh4");
-    			add_location(div, file$2, 463, 6, 9420);
+    			add_location(div, file$4, 461, 6, 9536);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -20800,16 +22838,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
+    		id: create_else_block$2.name,
     		type: "else",
-    		source: "(463:5) {:else}",
+    		source: "(461:5) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (458:5) {#if item.type == "global"}
+    // (456:5) {#if item.type == "global"}
     function create_if_block_1(ctx) {
     	let div;
     	let t0_value = /*items*/ ctx[12].indexOf(/*item*/ ctx[34]) + "";
@@ -20849,7 +22887,7 @@ var app = (function () {
     			t10 = text(t10_value);
     			t11 = space();
     			attr_dev(div, "class", "snapshot svelte-1b8xkh4");
-    			add_location(div, file$2, 458, 6, 9197);
+    			add_location(div, file$4, 456, 6, 9313);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -20900,20 +22938,20 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(458:5) {#if item.type == \\\"global\\\"}",
+    		source: "(456:5) {#if item.type == \\\"global\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (457:4) {#each items.slice(0, i) as item}
-    function create_each_block$2(ctx) {
+    // (455:4) {#each items.slice(0, i) as item}
+    function create_each_block$4(ctx) {
     	let current_block_type_index;
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block_1, create_else_block];
+    	const if_block_creators = [create_if_block_1, create_else_block$2];
     	const if_blocks = [];
 
     	function select_block_type_2(ctx, dirty) {
@@ -20976,16 +23014,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$2.name,
+    		id: create_each_block$4.name,
     		type: "each",
-    		source: "(457:4) {#each items.slice(0, i) as item}",
+    		source: "(455:4) {#each items.slice(0, i) as item}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$2(ctx) {
+    function create_fragment$4(ctx) {
     	let div60;
     	let h1;
     	let t1;
@@ -21122,48 +23160,48 @@ var app = (function () {
     	let t70;
     	let div41;
     	let div40;
-    	let p0;
-    	let t72;
+    	let scatterplot;
+    	let t71;
     	let div46;
     	let div43;
     	let h31;
-    	let t74;
+    	let t73;
     	let div45;
     	let div44;
-    	let p1;
-    	let t76;
+    	let scatterplot2;
+    	let t74;
     	let div56;
     	let div51;
     	let div48;
     	let h32;
-    	let t78;
+    	let t76;
     	let div50;
     	let div49;
     	let linechart;
-    	let t79;
+    	let t77;
     	let div55;
     	let div52;
     	let h33;
-    	let t81;
+    	let t79;
     	let div54;
     	let div53;
-    	let barchart;
-    	let t82;
+    	let linechart2;
+    	let t80;
     	let div58;
     	let div57;
     	let label2;
     	let input9;
+    	let t81;
+    	let t82;
     	let t83;
-    	let t84;
-    	let t85;
     	let div59;
-    	let t86;
+    	let t84;
     	let footer;
-    	let t87;
+    	let t85;
     	let br7;
-    	let t88;
+    	let t86;
     	let a0;
-    	let t90;
+    	let t88;
     	let a1;
     	let current;
     	let mounted;
@@ -21188,9 +23226,11 @@ var app = (function () {
 
     	let current_block_type_1 = select_block_type_1(ctx);
     	let if_block1 = current_block_type_1(ctx);
+    	scatterplot = new Scatterplot({ $$inline: true });
+    	scatterplot2 = new Scatterplot2({ $$inline: true });
     	linechart = new Linechart({ $$inline: true });
-    	barchart = new Barchart({ $$inline: true });
-    	let if_block2 = /*showItems*/ ctx[10] && create_if_block(ctx);
+    	linechart2 = new Linechart2({ $$inline: true });
+    	let if_block2 = /*showItems*/ ctx[10] && create_if_block$2(ctx);
 
     	const block = {
     		c: function create() {
@@ -21345,275 +23385,271 @@ var app = (function () {
     			t70 = space();
     			div41 = element("div");
     			div40 = element("div");
-    			p0 = element("p");
-    			p0.textContent = "sads";
-    			t72 = space();
+    			create_component(scatterplot.$$.fragment);
+    			t71 = space();
     			div46 = element("div");
     			div43 = element("div");
     			h31 = element("h3");
     			h31.textContent = "Local optimization 2D plot";
-    			t74 = space();
+    			t73 = space();
     			div45 = element("div");
     			div44 = element("div");
-    			p1 = element("p");
-    			p1.textContent = "sads";
-    			t76 = space();
+    			create_component(scatterplot2.$$.fragment);
+    			t74 = space();
     			div56 = element("div");
     			div51 = element("div");
     			div48 = element("div");
     			h32 = element("h3");
     			h32.textContent = "Global optimization quantitative result";
-    			t78 = space();
+    			t76 = space();
     			div50 = element("div");
     			div49 = element("div");
     			create_component(linechart.$$.fragment);
-    			t79 = space();
+    			t77 = space();
     			div55 = element("div");
     			div52 = element("div");
     			h33 = element("h3");
     			h33.textContent = "Local optimization quantitative result";
-    			t81 = space();
+    			t79 = space();
     			div54 = element("div");
     			div53 = element("div");
-    			create_component(barchart.$$.fragment);
-    			t82 = space();
+    			create_component(linechart2.$$.fragment);
+    			t80 = space();
     			div58 = element("div");
     			div57 = element("div");
     			label2 = element("label");
     			input9 = element("input");
-    			t83 = text("\n\t\t\t\tshow snapshots");
-    			t84 = space();
+    			t81 = text("\n\t\t\t\tshow snapshots");
+    			t82 = space();
     			if (if_block2) if_block2.c();
-    			t85 = space();
+    			t83 = space();
     			div59 = element("div");
-    			t86 = space();
+    			t84 = space();
     			footer = element("footer");
-    			t87 = text("Copyright 2020 Hyung-Kwon Ko\n\t\t");
+    			t85 = text("Copyright 2020 Hyung-Kwon Ko\n\t\t");
     			br7 = element("br");
-    			t88 = space();
+    			t86 = space();
     			a0 = element("a");
     			a0.textContent = "hkko@hcil.snu.ac.kr";
-    			t90 = text(" / ");
+    			t88 = text(" / ");
     			a1 = element("a");
     			a1.textContent = "hyungkwonko.info";
     			attr_dev(h1, "class", "svelte-1b8xkh4");
-    			add_location(h1, file$2, 214, 1, 3550);
+    			add_location(h1, file$4, 216, 1, 3654);
     			attr_dev(div0, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div0, file$2, 221, 3, 3632);
-    			add_location(b0, file$2, 238, 5, 4117);
-    			add_location(br0, file$2, 239, 5, 4142);
+    			add_location(div0, file$4, 223, 3, 3736);
+    			add_location(b0, file$4, 240, 5, 4221);
+    			add_location(br0, file$4, 241, 5, 4246);
     			attr_dev(div1, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div1, file$2, 237, 4, 4077);
+    			add_location(div1, file$4, 239, 4, 4181);
     			attr_dev(div2, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div2, file$2, 242, 4, 4202);
+    			add_location(div2, file$4, 244, 4, 4306);
     			attr_dev(input0, "type", "range");
     			attr_dev(input0, "min", "0.0");
     			attr_dev(input0, "max", "1.0");
     			attr_dev(input0, "step", "0.005");
     			attr_dev(input0, "class", "svelte-1b8xkh4");
-    			add_location(input0, file$2, 246, 5, 4311);
+    			add_location(input0, file$4, 248, 5, 4415);
     			attr_dev(div3, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div3, file$2, 245, 4, 4271);
+    			add_location(div3, file$4, 247, 4, 4375);
     			attr_dev(div4, "class", "row svelte-1b8xkh4");
-    			add_location(div4, file$2, 236, 3, 4055);
-    			add_location(b1, file$2, 251, 5, 4468);
-    			add_location(br1, file$2, 252, 5, 4500);
+    			add_location(div4, file$4, 238, 3, 4159);
+    			add_location(b1, file$4, 253, 5, 4572);
+    			add_location(br1, file$4, 254, 5, 4604);
     			attr_dev(div5, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div5, file$2, 250, 4, 4428);
+    			add_location(div5, file$4, 252, 4, 4532);
     			attr_dev(div6, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div6, file$2, 255, 4, 4557);
+    			add_location(div6, file$4, 257, 4, 4661);
     			attr_dev(input1, "type", "range");
     			attr_dev(input1, "min", "100");
     			attr_dev(input1, "max", "500");
     			attr_dev(input1, "step", "50");
     			attr_dev(input1, "class", "svelte-1b8xkh4");
-    			add_location(input1, file$2, 259, 5, 4661);
+    			add_location(input1, file$4, 261, 5, 4765);
     			attr_dev(div7, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div7, file$2, 258, 4, 4621);
+    			add_location(div7, file$4, 260, 4, 4725);
     			attr_dev(div8, "class", "row svelte-1b8xkh4");
-    			add_location(div8, file$2, 249, 3, 4406);
-    			add_location(b2, file$2, 264, 5, 4810);
-    			add_location(br2, file$2, 265, 5, 4843);
+    			add_location(div8, file$4, 251, 3, 4510);
+    			add_location(b2, file$4, 266, 5, 4914);
+    			add_location(br2, file$4, 267, 5, 4947);
     			attr_dev(div9, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div9, file$2, 263, 4, 4770);
+    			add_location(div9, file$4, 265, 4, 4874);
     			attr_dev(div10, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div10, file$2, 268, 4, 4896);
+    			add_location(div10, file$4, 270, 4, 5000);
     			attr_dev(input2, "type", "range");
     			attr_dev(input2, "min", "5");
     			attr_dev(input2, "max", "30");
     			attr_dev(input2, "step", "5");
     			attr_dev(input2, "class", "svelte-1b8xkh4");
-    			add_location(input2, file$2, 272, 5, 4998);
+    			add_location(input2, file$4, 274, 5, 5102);
     			attr_dev(div11, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div11, file$2, 271, 4, 4958);
+    			add_location(div11, file$4, 273, 4, 5062);
     			attr_dev(div12, "class", "row svelte-1b8xkh4");
-    			add_location(div12, file$2, 262, 3, 4748);
-    			add_location(b3, file$2, 277, 5, 5141);
+    			add_location(div12, file$4, 264, 3, 4852);
+    			add_location(b3, file$4, 279, 5, 5245);
     			attr_dev(div13, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div13, file$2, 276, 4, 5101);
+    			add_location(div13, file$4, 278, 4, 5205);
     			attr_dev(div14, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div14, file$2, 279, 4, 5175);
+    			add_location(div14, file$4, 281, 4, 5279);
     			attr_dev(input3, "type", "radio");
     			input3.__value = input3_value_value = "PCA";
     			input3.value = input3.__value;
     			attr_dev(input3, "class", "svelte-1b8xkh4");
     			/*$$binding_groups*/ ctx[25][0].push(input3);
-    			add_location(input3, file$2, 284, 6, 5292);
-    			add_location(label0, file$2, 283, 5, 5278);
+    			add_location(input3, file$4, 286, 6, 5396);
+    			add_location(label0, file$4, 285, 5, 5382);
     			attr_dev(input4, "type", "radio");
     			input4.__value = input4_value_value = "Random";
     			input4.value = input4.__value;
     			attr_dev(input4, "class", "svelte-1b8xkh4");
     			/*$$binding_groups*/ ctx[25][0].push(input4);
-    			add_location(input4, file$2, 289, 6, 5395);
-    			add_location(label1, file$2, 288, 5, 5381);
+    			add_location(input4, file$4, 291, 6, 5499);
+    			add_location(label1, file$4, 290, 5, 5485);
     			attr_dev(div15, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div15, file$2, 282, 4, 5238);
+    			add_location(div15, file$4, 284, 4, 5342);
     			attr_dev(div16, "class", "row svelte-1b8xkh4");
-    			add_location(div16, file$2, 275, 3, 5079);
+    			add_location(div16, file$4, 277, 3, 5183);
     			attr_dev(button0, "class", "svelte-1b8xkh4");
-    			add_location(button0, file$2, 297, 4, 5540);
+    			add_location(button0, file$4, 299, 4, 5644);
     			attr_dev(button1, "class", "svelte-1b8xkh4");
-    			add_location(button1, file$2, 300, 4, 5616);
+    			add_location(button1, file$4, 302, 4, 5720);
     			attr_dev(div17, "class", "sub-footer svelte-1b8xkh4");
-    			add_location(div17, file$2, 296, 3, 5511);
+    			add_location(div17, file$4, 298, 3, 5615);
     			attr_dev(div18, "class", "column svelte-1b8xkh4");
-    			add_location(div18, file$2, 220, 2, 3608);
+    			add_location(div18, file$4, 222, 2, 3712);
     			attr_dev(div19, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div19, file$2, 308, 3, 5778);
-    			add_location(b4, file$2, 329, 5, 6363);
-    			add_location(br3, file$2, 330, 5, 6387);
+    			add_location(div19, file$4, 310, 3, 5882);
+    			add_location(b4, file$4, 331, 5, 6467);
+    			add_location(br3, file$4, 332, 5, 6491);
     			attr_dev(div20, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div20, file$2, 328, 4, 6323);
+    			add_location(div20, file$4, 330, 4, 6427);
     			attr_dev(div21, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div21, file$2, 333, 4, 6447);
+    			add_location(div21, file$4, 335, 4, 6551);
     			attr_dev(input5, "type", "range");
     			attr_dev(input5, "min", "0.0");
     			attr_dev(input5, "max", "1.0");
     			attr_dev(input5, "step", "0.005");
     			attr_dev(input5, "class", "svelte-1b8xkh4");
-    			add_location(input5, file$2, 337, 5, 6555);
+    			add_location(input5, file$4, 339, 5, 6659);
     			attr_dev(div22, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div22, file$2, 336, 4, 6515);
+    			add_location(div22, file$4, 338, 4, 6619);
     			attr_dev(div23, "class", "row svelte-1b8xkh4");
-    			add_location(div23, file$2, 327, 3, 6301);
-    			add_location(b5, file$2, 342, 5, 6711);
-    			add_location(br4, file$2, 343, 5, 6746);
+    			add_location(div23, file$4, 329, 3, 6405);
+    			add_location(b5, file$4, 344, 5, 6815);
+    			add_location(br4, file$4, 345, 5, 6850);
     			attr_dev(div24, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div24, file$2, 341, 4, 6671);
+    			add_location(div24, file$4, 343, 4, 6775);
     			attr_dev(div25, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div25, file$2, 346, 4, 6799);
+    			add_location(div25, file$4, 348, 4, 6903);
     			attr_dev(input6, "type", "range");
     			attr_dev(input6, "min", "1");
     			attr_dev(input6, "max", "50");
     			attr_dev(input6, "step", "1");
     			attr_dev(input6, "class", "svelte-1b8xkh4");
-    			add_location(input6, file$2, 350, 5, 6904);
+    			add_location(input6, file$4, 352, 5, 7008);
     			attr_dev(div26, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div26, file$2, 349, 4, 6864);
+    			add_location(div26, file$4, 351, 4, 6968);
     			attr_dev(div27, "class", "row svelte-1b8xkh4");
-    			add_location(div27, file$2, 340, 3, 6649);
-    			add_location(b6, file$2, 355, 5, 7050);
-    			add_location(br5, file$2, 356, 5, 7083);
+    			add_location(div27, file$4, 342, 3, 6753);
+    			add_location(b6, file$4, 357, 5, 7154);
+    			add_location(br5, file$4, 358, 5, 7187);
     			attr_dev(div28, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div28, file$2, 354, 4, 7010);
+    			add_location(div28, file$4, 356, 4, 7114);
     			attr_dev(div29, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div29, file$2, 359, 4, 7139);
+    			add_location(div29, file$4, 361, 4, 7243);
     			attr_dev(input7, "type", "range");
     			attr_dev(input7, "min", "50");
     			attr_dev(input7, "max", "200");
     			attr_dev(input7, "step", "10");
     			attr_dev(input7, "class", "svelte-1b8xkh4");
-    			add_location(input7, file$2, 363, 5, 7244);
+    			add_location(input7, file$4, 365, 5, 7348);
     			attr_dev(div30, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div30, file$2, 362, 4, 7204);
+    			add_location(div30, file$4, 364, 4, 7308);
     			attr_dev(div31, "class", "row svelte-1b8xkh4");
-    			add_location(div31, file$2, 353, 3, 6988);
-    			add_location(b7, file$2, 368, 5, 7393);
-    			add_location(br6, file$2, 369, 5, 7435);
+    			add_location(div31, file$4, 355, 3, 7092);
+    			add_location(b7, file$4, 370, 5, 7497);
+    			add_location(br6, file$4, 371, 5, 7539);
     			attr_dev(div32, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div32, file$2, 367, 4, 7353);
+    			add_location(div32, file$4, 369, 4, 7457);
     			attr_dev(div33, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div33, file$2, 372, 4, 7492);
+    			add_location(div33, file$4, 374, 4, 7596);
     			attr_dev(input8, "type", "range");
     			attr_dev(input8, "min", "0");
     			attr_dev(input8, "max", "1");
     			attr_dev(input8, "step", "0.01");
     			attr_dev(input8, "class", "svelte-1b8xkh4");
-    			add_location(input8, file$2, 376, 5, 7602);
+    			add_location(input8, file$4, 378, 5, 7706);
     			attr_dev(div34, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div34, file$2, 375, 4, 7562);
+    			add_location(div34, file$4, 377, 4, 7666);
     			attr_dev(div35, "class", "row svelte-1b8xkh4");
-    			add_location(div35, file$2, 366, 3, 7331);
+    			add_location(div35, file$4, 368, 3, 7435);
     			attr_dev(button2, "class", "svelte-1b8xkh4");
-    			add_location(button2, file$2, 381, 4, 7724);
+    			add_location(button2, file$4, 383, 4, 7828);
     			attr_dev(div36, "class", "sub-footer svelte-1b8xkh4");
-    			add_location(div36, file$2, 380, 3, 7695);
+    			add_location(div36, file$4, 382, 3, 7799);
     			attr_dev(div37, "class", "column svelte-1b8xkh4");
-    			add_location(div37, file$2, 307, 2, 5754);
-    			add_location(div38, file$2, 218, 1, 3582);
+    			add_location(div37, file$4, 309, 2, 5858);
+    			add_location(div38, file$4, 220, 1, 3686);
     			attr_dev(h30, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h30, file$2, 392, 4, 7909);
+    			add_location(h30, file$4, 394, 4, 8013);
     			attr_dev(div39, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div39, file$2, 391, 3, 7881);
-    			add_location(p0, file$2, 398, 5, 8049);
+    			add_location(div39, file$4, 393, 3, 7985);
     			attr_dev(div40, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div40, file$2, 397, 4, 8013);
+    			add_location(div40, file$4, 399, 4, 8117);
     			attr_dev(div41, "class", "row svelte-1b8xkh4");
-    			add_location(div41, file$2, 396, 3, 7991);
+    			add_location(div41, file$4, 398, 3, 8095);
     			attr_dev(div42, "class", "column svelte-1b8xkh4");
-    			add_location(div42, file$2, 390, 2, 7857);
+    			add_location(div42, file$4, 392, 2, 7961);
     			attr_dev(h31, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h31, file$2, 406, 4, 8158);
+    			add_location(h31, file$4, 406, 4, 8265);
     			attr_dev(div43, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div43, file$2, 405, 3, 8130);
-    			add_location(p1, file$2, 412, 5, 8297);
+    			add_location(div43, file$4, 405, 3, 8237);
     			attr_dev(div44, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div44, file$2, 411, 4, 8261);
+    			add_location(div44, file$4, 411, 4, 8368);
     			attr_dev(div45, "class", "row svelte-1b8xkh4");
-    			add_location(div45, file$2, 410, 3, 8239);
+    			add_location(div45, file$4, 410, 3, 8346);
     			attr_dev(div46, "class", "column svelte-1b8xkh4");
-    			add_location(div46, file$2, 404, 2, 8106);
-    			add_location(div47, file$2, 388, 1, 7824);
+    			add_location(div46, file$4, 404, 2, 8213);
+    			add_location(div47, file$4, 390, 1, 7928);
     			attr_dev(h32, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h32, file$2, 424, 4, 8457);
+    			add_location(h32, file$4, 422, 4, 8569);
     			attr_dev(div48, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div48, file$2, 423, 3, 8429);
+    			add_location(div48, file$4, 421, 3, 8541);
     			attr_dev(div49, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div49, file$2, 429, 4, 8573);
+    			add_location(div49, file$4, 427, 4, 8685);
     			attr_dev(div50, "class", "row svelte-1b8xkh4");
-    			add_location(div50, file$2, 428, 3, 8551);
+    			add_location(div50, file$4, 426, 3, 8663);
     			attr_dev(div51, "class", "column svelte-1b8xkh4");
-    			add_location(div51, file$2, 422, 2, 8405);
+    			add_location(div51, file$4, 420, 2, 8517);
     			attr_dev(h33, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h33, file$2, 436, 4, 8717);
+    			add_location(h33, file$4, 434, 4, 8829);
     			attr_dev(div52, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div52, file$2, 435, 3, 8689);
+    			add_location(div52, file$4, 433, 3, 8801);
     			attr_dev(div53, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div53, file$2, 441, 4, 8832);
+    			add_location(div53, file$4, 439, 4, 8944);
     			attr_dev(div54, "class", "row svelte-1b8xkh4");
-    			add_location(div54, file$2, 440, 3, 8810);
+    			add_location(div54, file$4, 438, 3, 8922);
     			attr_dev(div55, "class", "column svelte-1b8xkh4");
-    			add_location(div55, file$2, 434, 2, 8665);
-    			add_location(div56, file$2, 420, 1, 8362);
+    			add_location(div55, file$4, 432, 2, 8777);
+    			add_location(div56, file$4, 418, 1, 8474);
     			attr_dev(input9, "type", "checkbox");
     			attr_dev(input9, "class", "svelte-1b8xkh4");
-    			add_location(input9, file$2, 452, 4, 9021);
-    			add_location(label2, file$2, 451, 3, 9009);
+    			add_location(input9, file$4, 450, 4, 9137);
+    			add_location(label2, file$4, 449, 3, 9125);
     			attr_dev(div57, "class", "column column-snapshot svelte-1b8xkh4");
-    			add_location(div57, file$2, 450, 2, 8969);
+    			add_location(div57, file$4, 448, 2, 9085);
     			attr_dev(div58, "class", "row svelte-1b8xkh4");
-    			add_location(div58, file$2, 449, 1, 8949);
+    			add_location(div58, file$4, 447, 1, 9065);
     			attr_dev(div59, "id", "my_dataviz");
-    			add_location(div59, file$2, 474, 1, 9796);
-    			add_location(br7, file$2, 479, 2, 9889);
+    			add_location(div59, file$4, 472, 1, 9912);
+    			add_location(br7, file$4, 477, 2, 10005);
     			attr_dev(a0, "href", "mailto:hkko@hcil.snu.ac.kr");
-    			add_location(a0, file$2, 480, 2, 9896);
+    			add_location(a0, file$4, 478, 2, 10012);
     			attr_dev(a1, "href", "https://hyungkwonko.info");
-    			add_location(a1, file$2, 480, 65, 9959);
+    			add_location(a1, file$4, 478, 65, 10075);
     			attr_dev(footer, "class", "copyright svelte-1b8xkh4");
-    			add_location(footer, file$2, 477, 1, 9829);
-    			add_location(div60, file$2, 213, 0, 3543);
+    			add_location(footer, file$4, 475, 1, 9945);
+    			add_location(div60, file$4, 215, 0, 3647);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21774,50 +23810,50 @@ var app = (function () {
     			append_dev(div42, t70);
     			append_dev(div42, div41);
     			append_dev(div41, div40);
-    			append_dev(div40, p0);
-    			append_dev(div47, t72);
+    			mount_component(scatterplot, div40, null);
+    			append_dev(div47, t71);
     			append_dev(div47, div46);
     			append_dev(div46, div43);
     			append_dev(div43, h31);
-    			append_dev(div46, t74);
+    			append_dev(div46, t73);
     			append_dev(div46, div45);
     			append_dev(div45, div44);
-    			append_dev(div44, p1);
-    			append_dev(div60, t76);
+    			mount_component(scatterplot2, div44, null);
+    			append_dev(div60, t74);
     			append_dev(div60, div56);
     			append_dev(div56, div51);
     			append_dev(div51, div48);
     			append_dev(div48, h32);
-    			append_dev(div51, t78);
+    			append_dev(div51, t76);
     			append_dev(div51, div50);
     			append_dev(div50, div49);
     			mount_component(linechart, div49, null);
-    			append_dev(div56, t79);
+    			append_dev(div56, t77);
     			append_dev(div56, div55);
     			append_dev(div55, div52);
     			append_dev(div52, h33);
-    			append_dev(div55, t81);
+    			append_dev(div55, t79);
     			append_dev(div55, div54);
     			append_dev(div54, div53);
-    			mount_component(barchart, div53, null);
-    			append_dev(div60, t82);
+    			mount_component(linechart2, div53, null);
+    			append_dev(div60, t80);
     			append_dev(div60, div58);
     			append_dev(div58, div57);
     			append_dev(div57, label2);
     			append_dev(label2, input9);
     			input9.checked = /*showItems*/ ctx[10];
-    			append_dev(label2, t83);
-    			append_dev(div57, t84);
+    			append_dev(label2, t81);
+    			append_dev(div57, t82);
     			if (if_block2) if_block2.m(div57, null);
-    			append_dev(div60, t85);
+    			append_dev(div60, t83);
     			append_dev(div60, div59);
-    			append_dev(div60, t86);
+    			append_dev(div60, t84);
     			append_dev(div60, footer);
-    			append_dev(footer, t87);
+    			append_dev(footer, t85);
     			append_dev(footer, br7);
-    			append_dev(footer, t88);
+    			append_dev(footer, t86);
     			append_dev(footer, a0);
-    			append_dev(footer, t90);
+    			append_dev(footer, t88);
     			append_dev(footer, a1);
     			current = true;
 
@@ -21949,7 +23985,7 @@ var app = (function () {
     						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block2 = create_if_block(ctx);
+    					if_block2 = create_if_block$2(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(div57, null);
@@ -21968,16 +24004,20 @@ var app = (function () {
     			if (current) return;
     			transition_in(default_slot, local);
     			transition_in(default_slot_1, local);
+    			transition_in(scatterplot.$$.fragment, local);
+    			transition_in(scatterplot2.$$.fragment, local);
     			transition_in(linechart.$$.fragment, local);
-    			transition_in(barchart.$$.fragment, local);
+    			transition_in(linechart2.$$.fragment, local);
     			transition_in(if_block2);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(default_slot, local);
     			transition_out(default_slot_1, local);
+    			transition_out(scatterplot.$$.fragment, local);
+    			transition_out(scatterplot2.$$.fragment, local);
     			transition_out(linechart.$$.fragment, local);
-    			transition_out(barchart.$$.fragment, local);
+    			transition_out(linechart2.$$.fragment, local);
     			transition_out(if_block2);
     			current = false;
     		},
@@ -21989,8 +24029,10 @@ var app = (function () {
     			/*$$binding_groups*/ ctx[25][0].splice(/*$$binding_groups*/ ctx[25][0].indexOf(input4), 1);
     			if (default_slot_1) default_slot_1.d(detaching);
     			if_block1.d();
+    			destroy_component(scatterplot);
+    			destroy_component(scatterplot2);
     			destroy_component(linechart);
-    			destroy_component(barchart);
+    			destroy_component(linechart2);
     			if (if_block2) if_block2.d();
     			mounted = false;
     			run_all(dispose);
@@ -21999,7 +24041,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$2.name,
+    		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
@@ -22028,7 +24070,7 @@ var app = (function () {
     	return false;
     }
 
-    function instance$2($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	let globalAlpha = 0.1;
     	let hubNum = 100;
     	let topN = 30;
@@ -22176,7 +24218,9 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		slide,
     		Linechart,
-    		Barchart,
+    		Linechart2,
+    		Scatterplot,
+    		Scatterplot2,
     		globalAlpha,
     		hubNum,
     		topN,
@@ -22262,13 +24306,13 @@ var app = (function () {
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {}, [-1, -1]);
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {}, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "App",
     			options,
-    			id: create_fragment$2.name
+    			id: create_fragment$4.name
     		});
     	}
     }

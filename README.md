@@ -5,13 +5,13 @@
 1. ~~local snapshot save~~
 2. ~~snapshot 클릭시 이펙트 넣기~~
 3. ~~결과 출력 보드 만들기 (d3 line chart + table)~~
-4. 데이터 저장
+4. ~~데이터 저장~~
 5. d3 라인차트
-- mouseover 연동하기
-- text도 같이 연동하기
-- mouseout 처리하기
+- ~~mouseover 연동하기~~
+- ~~text도 같이 연동하기~~
+- ~~mouseout 처리하기~~
 - 시간별로 출력하기
-- axis label & legend 넣기
+- ~~axis label & legend 넣기~~
 6. run이랑 연동 (3 & 5)
 
 ## how to publish on github

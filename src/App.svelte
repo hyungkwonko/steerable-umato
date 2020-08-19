@@ -1,7 +1,9 @@
 <script>
 	import { slide } from 'svelte/transition';
 	import Linechart from "./Linechart.svelte";
-	import Barchart from "./Barchart.svelte";
+	import Linechart2 from "./Linechart2.svelte";
+	import Scatterplot from "./Scatterplot.svelte";
+	import Scatterplot2 from "./Scatterplot2.svelte";
 
 	let globalAlpha = 0.1;
 	let hubNum = 100;
@@ -396,9 +398,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<p>
-						sads
-					</p>
+					<Scatterplot></Scatterplot>
 				</div>
 			</div>
 		</div>
@@ -410,9 +410,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<p>
-						sads
-					</p>
+					<Scatterplot2></Scatterplot2>
 				</div>
 			</div>
 		</div>
@@ -440,7 +438,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<Barchart></Barchart>
+					<Linechart2></Linechart2>
 				</div>
 			</div>
 		</div>

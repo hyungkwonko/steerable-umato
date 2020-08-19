@@ -1,13 +1,7 @@
-<!-- https://svelte.dev/repl/area-chart?version=3.24.1 -->
-<!-- https://github.com/sveltejs/svelte/issues/3050 -->
-<!-- https://svelte.dev/repl/ac35bd02ee76441592b1ded00ac3c515?version=3.5.2 -->
-<!-- https://svelte.dev/repl/b4c485ee69484fd8a63b8dc07c3b20a2?version=3.4.1 -->
-<!-- https://svelte.dev/repl/da70a84eb31c4ddda94122ae17768c19?version=3.17.2 -->
-
 <script>
 	import * as d3 from 'd3';
     import { onMount, beforeUpdate, afterUpdate } from 'svelte'
-    import data from './globalresult.json'
+    import data from './localresult.json'
 
     function translate(x, y) {
         return 'translate(' + x + ',' + y + ')'
@@ -15,7 +9,7 @@
 
     console.log(data);
 
-    let measures = ["dtm01", "dtm1", "ce"]
+    let measures = ["mrre", "continuity", "trust"]
 
 
     let r = 5;
@@ -35,12 +29,12 @@
     
 	data.forEach((d) => {
         d.iter = +d.iter;
-        d.dtm01 = +d.dtm01;
-		d.ce = +d.ce;
+        d.mrre = +d.mrre;
+		d.trust = +d.trust;
     });
 
     const yTicks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
-    const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
     
     
     console.log(data[0]);
@@ -56,11 +50,11 @@
 	$: minX = d3.min(data, d => d.iter);
 	$: maxX = d3.max(data, d => d.iter);
 
-    $: path = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`).join('L')}`;
-	$: path2 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm1)}`).join('L')}`;
-	$: path3 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.ce)}`).join('L')}`;
+    $: path = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.mrre)}`).join('L')}`;
+	$: path2 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.continuity)}`).join('L')}`;
+	$: path3 = `M${data.map(d => `${xScale(d.iter)}, ${yScale(d.trust)}`).join('L')}`;
 
-    // $: dot = data.map(d => `${xScale(d.iter)}, ${yScale(d.dtm01)}`);
+    // $: dot = data.map(d => `${xScale(d.iter)}, ${yScale(d.mrre)}`);
     // $: area = `${path}L${xScale(maxX)},${yScale(0)}L${xScale(minX)},${yScale(0)}Z`;
 
 	function formatMobile(tick) {
@@ -104,9 +98,9 @@
 
 		<!-- line chart -->
 		<!-- <path class="path-area" d={area}></path> -->
-        <path class="path-line path-line-dtm01" d={path}></path>
-        <path class="path-line path-line-dtm1" d={path2}></path>
-        <path class="path-line path-line-ce" d={path3}></path>
+        <path class="path-line path-line-mrre" d={path}></path>
+        <path class="path-line path-line-continuity" d={path2}></path>
+        <path class="path-line path-line-trust" d={path3}></path>
 
         <!-- axis label -->
         <text x='{(width - margin.left) / 2}' y='{height}' font-size="12px">Iteration #</text>
@@ -115,55 +109,55 @@
         {#each measures as measure, i}
             <circle class="circle-line circle-{measure}"
                 r={r}
-                cx='{width - 90}'
-                cy='{17 * (i + 1)}'
+                cx='{width - 100}'
+                cy='{280 + 17 * (i + 1)}'
             ></circle>
-            <text x='{width - 70}' y='{19 * (i+1)}' font-size="12px">{measure}</text>
+            <text x='{width - 80}' y='{280 + 19 * (i+1)}' font-size="12px">{measure}</text>
         {/each}
 
         <!-- circles -->
         {#each data as d, i}
             {#if !hs || i != targetIndex}
-                <circle class="circle-line circle-dtm01"
+                <circle class="circle-line circle-mrre"
                     r={r}
                     cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm01)}'
+                    cy='{yScale(d.mrre)}'
                     on:mouseover={(e) => hoverState(e, d, i)}
                 ></circle>
-                <circle class="circle-line circle-dtm1"
+                <circle class="circle-line circle-continuity"
                     r={r}
                     cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm1)}'
+                    cy='{yScale(d.continuity)}'
                     on:mouseover={(e) => hoverState(e, d, i)}
                 ></circle>
-                <circle class="circle-line circle-ce"
+                <circle class="circle-line circle-trust"
                     r={r}
                     cx='{xScale(d.iter)}'
-                    cy='{yScale(d.ce)}'
+                    cy='{yScale(d.trust)}'
                     on:mouseover={(e) => hoverState(e, d, i)}
                 ></circle>
             {:else}
-                <circle class="circle-line circle-dtm01"
+                <circle class="circle-line circle-mrre"
                     r={10}
                     cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm01)}'
+                    cy='{yScale(d.mrre)}'
                     on:mouseout={(e) => hoverStateOut(e, d, i)}
                 ></circle>
-                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.dtm01) - textMargin}'>{d.dtm01}</text>
-                <circle class="circle-line circle-dtm1"
+                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.mrre) - textMargin}'>{d.mrre}</text>
+                <circle class="circle-line circle-continuity"
                     r={10}
                     cx='{xScale(d.iter)}'
-                    cy='{yScale(d.dtm1)}'
+                    cy='{yScale(d.continuity)}'
                     on:mouseout={(e) => hoverStateOut(e, d, i)}
                 ></circle>
-                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.dtm1) - textMargin}'>{d.dtm1}</text>
-                <circle class="circle-line circle-ce"
+                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.continuity) - textMargin}'>{d.continuity}</text>
+                <circle class="circle-line circle-trust"
                     r={10}
                     cx='{xScale(d.iter)}'
-                    cy='{yScale(d.ce)}'
+                    cy='{yScale(d.trust)}'
                     on:mouseout={(e) => hoverStateOut(e, d, i)}
                 ></circle>
-                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.ce) - textMargin}'>{d.ce}</text>
+                <text x='{xScale(d.iter) + textMargin}' y='{yScale(d.trust) - textMargin}'>{d.trust}</text>
             {/if}
         {/each}
 	</svg>
@@ -176,13 +170,13 @@
         stroke-width: 1.5;
     }
 
-    .circle-dtm01 {
+    .circle-mrre {
         fill: green;
     }
-    .circle-dtm1 {
+    .circle-continuity {
         fill: blue;
     }
-    .circle-ce {
+    .circle-trust {
         fill: red;
     }
 
@@ -230,13 +224,13 @@
 		stroke-width: 2;
 	}
 
-    .path-line-dtm01 {
+    .path-line-mrre {
 		stroke: green;
     }
-    .path-line-dtm1 {
+    .path-line-continuity {
 		stroke: blue;
     }
-    .path-line-ce {
+    .path-line-trust {
 		stroke: red;
     }
 
