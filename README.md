@@ -4,7 +4,7 @@
 
 Steerable UMATO is an interactive web system for [UMATO](https://github.com/hyungkwonko/umato), which leverages two-phase optimization for dimensionality reduction. As there are many hyperparameters used in the algorithm, steerable UMATO provides an interactive way to explore such diversities for the best projection result. It consists of two main parts, global structure view (left half) and local structure view (right half). You can see the demo [here](https://hyungkwonko.github.io/steerable-umato/).
 
-## Run in local environment
+## Running the app locally
 1. Download the source code
 ```bash
 git clone https://github.com/hyungkwonko/steerable-umato.git
@@ -15,7 +15,7 @@ git clone https://github.com/hyungkwonko/steerable-umato.git
 npm i
 ```
 
-3. Run in local environment
+3. Run on a local machine
 ```bash
 npm run dev
 ```
