@@ -14,7 +14,8 @@
 - ~~axis label & legend 넣기~~
 6. ~~d3 Scatterplots~~
 - ~~시간별로 출력하기~~
-7. run이랑 연동 (3 & 5,6)
+7. ~~run이랑 연동 (3 & 5,6)~~
+8. backend 붙이기
 
 ## how to publish on github
 1. deploy 명령어 추가

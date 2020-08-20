@@ -119,6 +119,7 @@
             <!-- label: NN num -->
             <text x='{width - margin.left - 100}' y='{30}' font-size="12px">NN Num: {points.length}</text>
 
+            <!-- points -->
             {#each points as d, i}
                 <circle class="circle-line"
                     r={r}
