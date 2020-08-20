@@ -1,30 +1,37 @@
 <!-- https://svelte.dev/examples#scatterplot -->
+<!-- https://svelte.recipes/components/scatterplot/ -->
+<!-- https://svelte.dev/repl/b4c485ee69484fd8a63b8dc07c3b20a2?version=3.4.1 -->
+
 <script>
-	import * as d3 from 'd3';
+    import * as d3 from 'd3';
+	import * as easings from 'svelte/easing';
+	import { tweened } from 'svelte/motion';
+    import { onMount, beforeUpdate, afterUpdate } from 'svelte'
+    import data from './umato_small.json'
+
+    export let globalClicked = false;
 
     function translate(x, y) { return 'translate(' + x + ',' + y + ')'; }
 
-    function read_csv(path) {
-        let request = new XMLHttpRequest();  
-        request.open("GET", path, false);   
-        request.send(null);
+	let member = '0';
+	let points = data[member];
 
-        let csvData = new Array();
-        let jsonObject = request.responseText.split(/\r?\n|\r/);
-        for (let i = 0; i < jsonObject.length; i++) {
-            csvData.push(jsonObject[i].split(','));
-        }
-        return csvData
-    }
+    let counter2 = 0;
+    let flag = true;
 
-    let data = read_csv("umato-large.csv")
-
-    let r = 2.5;
-    let textMargin = 7;
-
+    let r = 5;
     let hs = false;
     let targetIndex = -1;
 	
+	const tweenedPoints = tweened(points, {
+		delay: 0,
+		duration: 750,
+		easing: easings.cubicOut
+    });
+    
+	const [minX, maxX] = d3.extent($tweenedPoints,(d) => d.x1);
+	const [minY, maxY] = d3.extent($tweenedPoints,(d) => d.x2);
+
     const svgWidth = 600
     const svgHeight = 600
     const margin = { top: 30, right: 15, bottom: 30, left: 25 };
@@ -32,37 +39,58 @@
     let width = svgWidth - margin.left - margin.right
     let height = svgHeight - margin.top - margin.bottom
     
-	data.forEach((d) => {
-        d[0] = +d[0];
-        d[1] = +d[1];
-		d[2] = +d[2];
-    });
+	$: xScale = d3.scaleLinear()
+		.domain([minX, maxX])
+		.range([margin.left, width - margin.right]);
+
+	$: yScale = d3.scaleLinear()
+		.domain([minY, maxY])
+		.range([height - margin.bottom, margin.top]);
 
     const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const yTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const colorDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    $: xScale = d3.scaleLinear()
-        .domain([Math.min.apply(null, xTicks), Math.max.apply(null, xTicks)])
-        .range([margin.left, width - margin.right]);
-
-	$: yScale = d3.scaleLinear()
-		.domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)])
-        .range([height - margin.bottom, margin.top]);
-
-    // const colorScale = d3.scaleLinear()
-    //     .domain(d3.extent(colorDomain))
-    //     .range(["black", "red"]);
-
     const colorScale =  d3.scaleOrdinal()
         .domain(d3.extent(colorDomain))
         .range(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]);
+
+	function setTween(key) {
+		tweenedPoints.set(data[key]);
+	}
+
+	$: setTween(member)
+
+	// member = "1";
+	// points = data[member]
+
+	onMount(() => {
+    });
+
+    beforeUpdate(() => {
+    });
+    
+	afterUpdate(() => {
+		console.log(counter2);
+		counter2 += 1
+		// if(globalClicked && flag) {
+        //     flag = false
+        //     const interval = setInterval(() => {
+        //         if (counter2 < 10) counter2++;
+        //     }, 1000);
+        //     return () => clearInterval(interval);
+        // }
+
+        // // remove chart when stopped
+        // if(!globalClicked) {
+        //     counter2 = 0
+        // }
+	});
 
 </script>
 
 <div class="chart" bind:clientWidth={width} bind:clientHeight={height}>
 	<svg>
-		<!-- y axis -->
 		<g class="axis y-axis" transform="translate(0, {margin.top})">
 			{#each yTicks as tick}
 				<g class="tick tick-{tick}" transform="translate(0, {yScale(tick) - margin.bottom / 2})">
@@ -72,7 +100,6 @@
 			{/each}
 		</g>
 
-		<!-- x axis -->
 		<g class="axis x-axis">
 			{#each xTicks as tick}
 				<g class="tick tick-{ tick }" transform="translate({xScale(tick)},{height + margin.top / 2})">
@@ -82,12 +109,12 @@
 			{/each}
 		</g>
 
-        {#each data as d, i}
+        {#each points as d, i}
             <circle class="circle-line"
                 r={r}
-                cx='{xScale(d[0])}'
-                cy='{yScale(d[1])}'
-                fill='{colorScale(d[2])}'
+                cx='{xScale(d.x1)}'
+                cy='{yScale(d.x2)}'
+                fill='{colorScale(d.label)}'
             ></circle>
         {/each}
     </svg>
@@ -132,8 +159,8 @@
 	}
 
     .circle-line {
-        fill-opacity: 0.7;
+        fill-opacity: 1.0;
         stroke: black;
-        stroke-width: 0.2;
+        stroke-width: 0.4;
     }
 </style>

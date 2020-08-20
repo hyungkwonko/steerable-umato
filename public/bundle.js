@@ -34,6 +34,21 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function validate_store(store, name) {
+        if (store != null && typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
             const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
@@ -717,10 +732,181 @@ var app = (function () {
         $inject_state() { }
     }
 
+    /*
+    Adapted from https://github.com/mattdesl
+    Distributed under MIT License https://github.com/mattdesl/eases/blob/master/LICENSE.md
+    */
+    function backInOut(t) {
+        const s = 1.70158 * 1.525;
+        if ((t *= 2) < 1)
+            return 0.5 * (t * t * ((s + 1) * t - s));
+        return 0.5 * ((t -= 2) * t * ((s + 1) * t + s) + 2);
+    }
+    function backIn(t) {
+        const s = 1.70158;
+        return t * t * ((s + 1) * t - s);
+    }
+    function backOut(t) {
+        const s = 1.70158;
+        return --t * t * ((s + 1) * t + s) + 1;
+    }
+    function bounceOut(t) {
+        const a = 4.0 / 11.0;
+        const b = 8.0 / 11.0;
+        const c = 9.0 / 10.0;
+        const ca = 4356.0 / 361.0;
+        const cb = 35442.0 / 1805.0;
+        const cc = 16061.0 / 1805.0;
+        const t2 = t * t;
+        return t < a
+            ? 7.5625 * t2
+            : t < b
+                ? 9.075 * t2 - 9.9 * t + 3.4
+                : t < c
+                    ? ca * t2 - cb * t + cc
+                    : 10.8 * t * t - 20.52 * t + 10.72;
+    }
+    function bounceInOut(t) {
+        return t < 0.5
+            ? 0.5 * (1.0 - bounceOut(1.0 - t * 2.0))
+            : 0.5 * bounceOut(t * 2.0 - 1.0) + 0.5;
+    }
+    function bounceIn(t) {
+        return 1.0 - bounceOut(1.0 - t);
+    }
+    function circInOut(t) {
+        if ((t *= 2) < 1)
+            return -0.5 * (Math.sqrt(1 - t * t) - 1);
+        return 0.5 * (Math.sqrt(1 - (t -= 2) * t) + 1);
+    }
+    function circIn(t) {
+        return 1.0 - Math.sqrt(1.0 - t * t);
+    }
+    function circOut(t) {
+        return Math.sqrt(1 - --t * t);
+    }
+    function cubicInOut(t) {
+        return t < 0.5 ? 4.0 * t * t * t : 0.5 * Math.pow(2.0 * t - 2.0, 3.0) + 1.0;
+    }
+    function cubicIn(t) {
+        return t * t * t;
+    }
     function cubicOut(t) {
         const f = t - 1.0;
         return f * f * f + 1.0;
     }
+    function elasticInOut(t) {
+        return t < 0.5
+            ? 0.5 *
+                Math.sin(((+13.0 * Math.PI) / 2) * 2.0 * t) *
+                Math.pow(2.0, 10.0 * (2.0 * t - 1.0))
+            : 0.5 *
+                Math.sin(((-13.0 * Math.PI) / 2) * (2.0 * t - 1.0 + 1.0)) *
+                Math.pow(2.0, -10.0 * (2.0 * t - 1.0)) +
+                1.0;
+    }
+    function elasticIn(t) {
+        return Math.sin((13.0 * t * Math.PI) / 2) * Math.pow(2.0, 10.0 * (t - 1.0));
+    }
+    function elasticOut(t) {
+        return (Math.sin((-13.0 * (t + 1.0) * Math.PI) / 2) * Math.pow(2.0, -10.0 * t) + 1.0);
+    }
+    function expoInOut(t) {
+        return t === 0.0 || t === 1.0
+            ? t
+            : t < 0.5
+                ? +0.5 * Math.pow(2.0, 20.0 * t - 10.0)
+                : -0.5 * Math.pow(2.0, 10.0 - t * 20.0) + 1.0;
+    }
+    function expoIn(t) {
+        return t === 0.0 ? t : Math.pow(2.0, 10.0 * (t - 1.0));
+    }
+    function expoOut(t) {
+        return t === 1.0 ? t : 1.0 - Math.pow(2.0, -10.0 * t);
+    }
+    function quadInOut(t) {
+        t /= 0.5;
+        if (t < 1)
+            return 0.5 * t * t;
+        t--;
+        return -0.5 * (t * (t - 2) - 1);
+    }
+    function quadIn(t) {
+        return t * t;
+    }
+    function quadOut(t) {
+        return -t * (t - 2.0);
+    }
+    function quartInOut(t) {
+        return t < 0.5
+            ? +8.0 * Math.pow(t, 4.0)
+            : -8.0 * Math.pow(t - 1.0, 4.0) + 1.0;
+    }
+    function quartIn(t) {
+        return Math.pow(t, 4.0);
+    }
+    function quartOut(t) {
+        return Math.pow(t - 1.0, 3.0) * (1.0 - t) + 1.0;
+    }
+    function quintInOut(t) {
+        if ((t *= 2) < 1)
+            return 0.5 * t * t * t * t * t;
+        return 0.5 * ((t -= 2) * t * t * t * t + 2);
+    }
+    function quintIn(t) {
+        return t * t * t * t * t;
+    }
+    function quintOut(t) {
+        return --t * t * t * t * t + 1;
+    }
+    function sineInOut(t) {
+        return -0.5 * (Math.cos(Math.PI * t) - 1);
+    }
+    function sineIn(t) {
+        const v = Math.cos(t * Math.PI * 0.5);
+        if (Math.abs(v) < 1e-14)
+            return 1;
+        else
+            return 1 - v;
+    }
+    function sineOut(t) {
+        return Math.sin((t * Math.PI) / 2);
+    }
+
+    var easings = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        backIn: backIn,
+        backInOut: backInOut,
+        backOut: backOut,
+        bounceIn: bounceIn,
+        bounceInOut: bounceInOut,
+        bounceOut: bounceOut,
+        circIn: circIn,
+        circInOut: circInOut,
+        circOut: circOut,
+        cubicIn: cubicIn,
+        cubicInOut: cubicInOut,
+        cubicOut: cubicOut,
+        elasticIn: elasticIn,
+        elasticInOut: elasticInOut,
+        elasticOut: elasticOut,
+        expoIn: expoIn,
+        expoInOut: expoInOut,
+        expoOut: expoOut,
+        quadIn: quadIn,
+        quadInOut: quadInOut,
+        quadOut: quadOut,
+        quartIn: quartIn,
+        quartInOut: quartInOut,
+        quartOut: quartOut,
+        quintIn: quintIn,
+        quintInOut: quintInOut,
+        quintOut: quintOut,
+        sineIn: sineIn,
+        sineInOut: sineInOut,
+        sineOut: sineOut,
+        linear: identity
+    });
 
     function slide(node, { delay = 0, duration = 400, easing = cubicOut }) {
         const style = getComputedStyle(node);
@@ -4799,19 +4985,19 @@ var app = (function () {
       return +t;
     }
 
-    function quadIn(t) {
+    function quadIn$1(t) {
       return t * t;
     }
 
-    function quadOut(t) {
+    function quadOut$1(t) {
       return t * (2 - t);
     }
 
-    function quadInOut(t) {
+    function quadInOut$1(t) {
       return ((t *= 2) <= 1 ? t * t : --t * (2 - t) + 1) / 2;
     }
 
-    function cubicIn(t) {
+    function cubicIn$1(t) {
       return t * t * t;
     }
 
@@ -4819,7 +5005,7 @@ var app = (function () {
       return --t * t * t + 1;
     }
 
-    function cubicInOut(t) {
+    function cubicInOut$1(t) {
       return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
     }
 
@@ -4911,21 +5097,21 @@ var app = (function () {
         b9 = 63 / 64,
         b0 = 1 / b1 / b1;
 
-    function bounceIn(t) {
-      return 1 - bounceOut(1 - t);
+    function bounceIn$1(t) {
+      return 1 - bounceOut$1(1 - t);
     }
 
-    function bounceOut(t) {
+    function bounceOut$1(t) {
       return (t = +t) < b1 ? b0 * t * t : t < b3 ? b0 * (t -= b2) * t + b4 : t < b6 ? b0 * (t -= b5) * t + b7 : b0 * (t -= b8) * t + b9;
     }
 
-    function bounceInOut(t) {
-      return ((t *= 2) <= 1 ? 1 - bounceOut(1 - t) : bounceOut(t - 1) + 1) / 2;
+    function bounceInOut$1(t) {
+      return ((t *= 2) <= 1 ? 1 - bounceOut$1(1 - t) : bounceOut$1(t - 1) + 1) / 2;
     }
 
     var overshoot = 1.70158;
 
-    var backIn = (function custom(s) {
+    var backIn$1 = (function custom(s) {
       s = +s;
 
       function backIn(t) {
@@ -4937,7 +5123,7 @@ var app = (function () {
       return backIn;
     })(overshoot);
 
-    var backOut = (function custom(s) {
+    var backOut$1 = (function custom(s) {
       s = +s;
 
       function backOut(t) {
@@ -4949,7 +5135,7 @@ var app = (function () {
       return backOut;
     })(overshoot);
 
-    var backInOut = (function custom(s) {
+    var backInOut$1 = (function custom(s) {
       s = +s;
 
       function backInOut(t) {
@@ -4965,7 +5151,7 @@ var app = (function () {
         amplitude = 1,
         period = 0.3;
 
-    var elasticIn = (function custom(a, p) {
+    var elasticIn$1 = (function custom(a, p) {
       var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
 
       function elasticIn(t) {
@@ -4978,7 +5164,7 @@ var app = (function () {
       return elasticIn;
     })(amplitude, period);
 
-    var elasticOut = (function custom(a, p) {
+    var elasticOut$1 = (function custom(a, p) {
       var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
 
       function elasticOut(t) {
@@ -4991,7 +5177,7 @@ var app = (function () {
       return elasticOut;
     })(amplitude, period);
 
-    var elasticInOut = (function custom(a, p) {
+    var elasticInOut$1 = (function custom(a, p) {
       var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
 
       function elasticInOut(t) {
@@ -5010,7 +5196,7 @@ var app = (function () {
       time: null, // Set on use.
       delay: 0,
       duration: 250,
-      ease: cubicInOut
+      ease: cubicInOut$1
     };
 
     function inherit(node, id) {
@@ -18898,14 +19084,14 @@ var app = (function () {
         tsvFormatValue: tsvFormatValue,
         autoType: autoType,
         easeLinear: linear$1,
-        easeQuad: quadInOut,
-        easeQuadIn: quadIn,
-        easeQuadOut: quadOut,
-        easeQuadInOut: quadInOut,
-        easeCubic: cubicInOut,
-        easeCubicIn: cubicIn,
+        easeQuad: quadInOut$1,
+        easeQuadIn: quadIn$1,
+        easeQuadOut: quadOut$1,
+        easeQuadInOut: quadInOut$1,
+        easeCubic: cubicInOut$1,
+        easeCubicIn: cubicIn$1,
         easeCubicOut: cubicOut$1,
-        easeCubicInOut: cubicInOut,
+        easeCubicInOut: cubicInOut$1,
         easePoly: polyInOut,
         easePolyIn: polyIn,
         easePolyOut: polyOut,
@@ -18922,18 +19108,18 @@ var app = (function () {
         easeCircleIn: circleIn,
         easeCircleOut: circleOut,
         easeCircleInOut: circleInOut,
-        easeBounce: bounceOut,
-        easeBounceIn: bounceIn,
-        easeBounceOut: bounceOut,
-        easeBounceInOut: bounceInOut,
-        easeBack: backInOut,
-        easeBackIn: backIn,
-        easeBackOut: backOut,
-        easeBackInOut: backInOut,
-        easeElastic: elasticOut,
-        easeElasticIn: elasticIn,
-        easeElasticOut: elasticOut,
-        easeElasticInOut: elasticInOut,
+        easeBounce: bounceOut$1,
+        easeBounceIn: bounceIn$1,
+        easeBounceOut: bounceOut$1,
+        easeBounceInOut: bounceInOut$1,
+        easeBack: backInOut$1,
+        easeBackIn: backIn$1,
+        easeBackOut: backOut$1,
+        easeBackInOut: backInOut$1,
+        easeElastic: elasticOut$1,
+        easeElasticIn: elasticIn$1,
+        easeElasticOut: elasticOut$1,
+        easeElasticInOut: elasticInOut$1,
         blob: blob,
         buffer: buffer,
         dsv: dsv,
@@ -19323,8 +19509,8 @@ var app = (function () {
 
     var data = [{iter:0,dtm01:0.35,dtm1:0.93,ce:0.78},{iter:1,dtm01:0.37,dtm1:0.92,ce:0.71},{iter:2,dtm01:0.35,dtm1:0.9,ce:0.69},{iter:3,dtm01:0.32,dtm1:0.7,ce:0.45},{iter:4,dtm01:0.28,dtm1:0.67,ce:0.63},{iter:5,dtm01:0.22,dtm1:0.54,ce:0.62},{iter:6,dtm01:0.21,dtm1:0.55,ce:0.48},{iter:7,dtm01:0.19,dtm1:0.47,ce:0.45},{iter:8,dtm01:0.16,dtm1:0.49,ce:0.42},{iter:9,dtm01:0.09,dtm1:0.22,ce:0.38}];
 
-    /* src\Linechart.svelte generated by Svelte v3.24.1 */
-    const file = "src\\Linechart.svelte";
+    /* src/Linechart.svelte generated by Svelte v3.24.1 */
+    const file = "src/Linechart.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -20456,8 +20642,8 @@ var app = (function () {
 
     var data$1 = [{iter:0,mrre:0.45,continuity:0.44,trust:0.29},{iter:1,mrre:0.47,continuity:0.63,trust:0.6},{iter:2,mrre:0.47,continuity:0.66,trust:0.69},{iter:3,mrre:0.4,continuity:0.7,trust:0.59},{iter:4,mrre:0.59,continuity:0.71,trust:0.6},{iter:5,mrre:0.6,continuity:0.59,trust:0.62},{iter:6,mrre:0.6,continuity:0.73,trust:0.66},{iter:7,mrre:0.6,continuity:0.69,trust:0.66},{iter:8,mrre:0.6,continuity:0.73,trust:0.8},{iter:9,mrre:0.59,continuity:0.73,trust:0.89},{iter:10,mrre:0.6,continuity:0.73,trust:0.91},{iter:11,mrre:0.62,continuity:0.73,trust:0.91},{iter:12,mrre:0.6,continuity:0.73,trust:0.95},{iter:13,mrre:0.6,continuity:0.73,trust:0.94},{iter:14,mrre:0.71,continuity:0.88,trust:0.95},{iter:15,mrre:0.83,continuity:0.78,trust:0.96},{iter:16,mrre:0.92,continuity:0.9,trust:0.91},{iter:17,mrre:0.8,continuity:0.82,trust:0.9},{iter:18,mrre:0.91,continuity:0.8,trust:0.88},{iter:19,mrre:0.9,continuity:0.89,trust:0.95}];
 
-    /* src\Linechart2.svelte generated by Svelte v3.24.1 */
-    const file$1 = "src\\Linechart2.svelte";
+    /* src/Linechart2.svelte generated by Svelte v3.24.1 */
+    const file$1 = "src/Linechart2.svelte";
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -21587,34 +21773,34 @@ var app = (function () {
     	}
     }
 
-    /* src\Scatterplot.svelte generated by Svelte v3.24.1 */
-    const file$2 = "src\\Scatterplot.svelte";
+    /* src/Scatterplot.svelte generated by Svelte v3.24.1 */
+    const file$2 = "src/Scatterplot.svelte";
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[17] = list[i];
-    	child_ctx[19] = i;
+    	child_ctx[14] = list[i];
+    	child_ctx[16] = i;
     	return child_ctx;
     }
 
     function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[17] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_2$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[17] = list[i];
     	return child_ctx;
     }
 
-    // (70:3) {#each yTicks as tick}
+    // (67:3) {#each yTicks as tick}
     function create_each_block_2$2(ctx) {
     	let g;
     	let line;
     	let text_1;
-    	let t_value = /*tick*/ ctx[20] + "";
+    	let t_value = /*tick*/ ctx[17] + "";
     	let t;
     	let g_class_value;
     	let g_transform_value;
@@ -21627,13 +21813,13 @@ var app = (function () {
     			t = text(t_value);
     			attr_dev(line, "x2", "100%");
     			attr_dev(line, "class", "svelte-1vbxcn7");
-    			add_location(line, file$2, 71, 5, 2204);
+    			add_location(line, file$2, 68, 5, 2162);
     			attr_dev(text_1, "y", "-4");
     			attr_dev(text_1, "class", "svelte-1vbxcn7");
-    			add_location(text_1, file$2, 72, 5, 2233);
-    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[20] + " svelte-1vbxcn7");
-    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[20]) - /*margin*/ ctx[6].bottom / 2) + ")");
-    			add_location(g, file$2, 70, 4, 2109);
+    			add_location(text_1, file$2, 69, 5, 2191);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[17] + " svelte-1vbxcn7");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[17]) - /*margin*/ ctx[6].bottom / 2) + ")");
+    			add_location(g, file$2, 67, 4, 2067);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, g, anchor);
@@ -21642,7 +21828,7 @@ var app = (function () {
     			append_dev(text_1, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[20]) - /*margin*/ ctx[6].bottom / 2) + ")")) {
+    			if (dirty & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[17]) - /*margin*/ ctx[6].bottom / 2) + ")")) {
     				attr_dev(g, "transform", g_transform_value);
     			}
     		},
@@ -21655,21 +21841,21 @@ var app = (function () {
     		block,
     		id: create_each_block_2$2.name,
     		type: "each",
-    		source: "(70:3) {#each yTicks as tick}",
+    		source: "(67:3) {#each yTicks as tick}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (80:3) {#each xTicks as tick}
+    // (77:3) {#each xTicks as tick}
     function create_each_block_1$2(ctx) {
     	let g;
     	let line;
     	let line_y__value;
     	let line_y__value_1;
     	let text_1;
-    	let t_value = /*tick*/ ctx[20] + "";
+    	let t_value = /*tick*/ ctx[17] + "";
     	let t;
     	let text_1_y_value;
     	let g_class_value;
@@ -21686,13 +21872,13 @@ var app = (function () {
     			attr_dev(line, "x1", "0");
     			attr_dev(line, "x2", "0");
     			attr_dev(line, "class", "svelte-1vbxcn7");
-    			add_location(line, file$2, 81, 5, 2462);
+    			add_location(line, file$2, 78, 5, 2420);
     			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[6].bottom - 10));
     			attr_dev(text_1, "class", "svelte-1vbxcn7");
-    			add_location(text_1, file$2, 82, 5, 2532);
-    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[20] + " svelte-1vbxcn7");
-    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[20]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")");
-    			add_location(g, file$2, 80, 4, 2362);
+    			add_location(text_1, file$2, 79, 5, 2490);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[17] + " svelte-1vbxcn7");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[17]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")");
+    			add_location(g, file$2, 77, 4, 2320);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, g, anchor);
@@ -21705,7 +21891,7 @@ var app = (function () {
     				attr_dev(line, "y1", line_y__value);
     			}
 
-    			if (dirty & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[20]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")")) {
+    			if (dirty & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[17]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")")) {
     				attr_dev(g, "transform", g_transform_value);
     			}
     		},
@@ -21718,14 +21904,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(80:3) {#each xTicks as tick}",
+    		source: "(77:3) {#each xTicks as tick}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (88:8) {#each data as d, i}
+    // (85:8) {#each data as d, i}
     function create_each_block$2(ctx) {
     	let circle;
     	let circle_cx_value;
@@ -21737,20 +21923,20 @@ var app = (function () {
     			circle = svg_element("circle");
     			attr_dev(circle, "class", "circle-line svelte-1vbxcn7");
     			attr_dev(circle, "r", /*r*/ ctx[5]);
-    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[17][0]));
-    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[17][1]));
-    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[9](/*d*/ ctx[17][2]));
-    			add_location(circle, file$2, 88, 12, 2645);
+    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[14][0]));
+    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[14][1]));
+    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[9](/*d*/ ctx[14][2]));
+    			add_location(circle, file$2, 85, 12, 2603);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, circle, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[17][0]))) {
+    			if (dirty & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[14][0]))) {
     				attr_dev(circle, "cx", circle_cx_value);
     			}
 
-    			if (dirty & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[17][1]))) {
+    			if (dirty & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[14][1]))) {
     				attr_dev(circle, "cy", circle_cy_value);
     			}
     		},
@@ -21763,7 +21949,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(88:8) {#each data as d, i}",
+    		source: "(85:8) {#each data as d, i}",
     		ctx
     	});
 
@@ -21823,14 +22009,14 @@ var app = (function () {
 
     			attr_dev(g0, "class", "axis y-axis");
     			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[6].top + ")");
-    			add_location(g0, file$2, 68, 2, 2016);
+    			add_location(g0, file$2, 65, 2, 1974);
     			attr_dev(g1, "class", "axis x-axis svelte-1vbxcn7");
-    			add_location(g1, file$2, 78, 2, 2308);
+    			add_location(g1, file$2, 75, 2, 2266);
     			attr_dev(svg, "class", "svelte-1vbxcn7");
-    			add_location(svg, file$2, 66, 1, 1990);
+    			add_location(svg, file$2, 63, 1, 1948);
     			attr_dev(div, "class", "chart svelte-1vbxcn7");
     			add_render_callback(() => /*div_elementresize_handler*/ ctx[10].call(div));
-    			add_location(div, file$2, 65, 0, 1917);
+    			add_location(div, file$2, 62, 0, 1875);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21973,8 +22159,7 @@ var app = (function () {
     }
 
     function instance$2($$self, $$props, $$invalidate) {
-    	let data = read_csv("umato-small_0.csv");
-    	let el;
+    	let data = read_csv("umato-small.csv");
     	let r = 5;
     	let hs = false;
     	let targetIndex = -1;
@@ -22029,7 +22214,6 @@ var app = (function () {
     		translate: translate$2,
     		read_csv,
     		data,
-    		el,
     		r,
     		hs,
     		targetIndex,
@@ -22043,14 +22227,11 @@ var app = (function () {
     		colorDomain,
     		colorScale,
     		xScale,
-    		yScale,
-    		minX,
-    		maxX
+    		yScale
     	});
 
     	$$self.$inject_state = $$props => {
     		if ("data" in $$props) $$invalidate(4, data = $$props.data);
-    		if ("el" in $$props) el = $$props.el;
     		if ("r" in $$props) $$invalidate(5, r = $$props.r);
     		if ("hs" in $$props) hs = $$props.hs;
     		if ("targetIndex" in $$props) targetIndex = $$props.targetIndex;
@@ -22058,14 +22239,10 @@ var app = (function () {
     		if ("height" in $$props) $$invalidate(1, height = $$props.height);
     		if ("xScale" in $$props) $$invalidate(2, xScale = $$props.xScale);
     		if ("yScale" in $$props) $$invalidate(3, yScale = $$props.yScale);
-    		if ("minX" in $$props) minX = $$props.minX;
-    		if ("maxX" in $$props) maxX = $$props.maxX;
     	};
 
     	let xScale;
     	let yScale;
-    	let minX;
-    	let maxX;
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
@@ -22080,9 +22257,6 @@ var app = (function () {
     			 $$invalidate(3, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
     		}
     	};
-
-    	 minX = min(data, d => d.iter);
-    	 maxX = max(data, d => d.iter);
 
     	return [
     		width,
@@ -22113,34 +22287,34 @@ var app = (function () {
     	}
     }
 
-    /* src\Scatterplot2.svelte generated by Svelte v3.24.1 */
-    const file$3 = "src\\Scatterplot2.svelte";
+    /* src/Scatterplot2.svelte generated by Svelte v3.24.1 */
+    const file$3 = "src/Scatterplot2.svelte";
 
     function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[18] = list[i];
-    	child_ctx[20] = i;
+    	child_ctx[15] = list[i];
+    	child_ctx[17] = i;
     	return child_ctx;
     }
 
     function get_each_context_1$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[21] = list[i];
+    	child_ctx[18] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_2$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[21] = list[i];
+    	child_ctx[18] = list[i];
     	return child_ctx;
     }
 
-    // (72:3) {#each yTicks as tick}
+    // (67:3) {#each yTicks as tick}
     function create_each_block_2$3(ctx) {
     	let g;
     	let line;
     	let text_1;
-    	let t_value = /*tick*/ ctx[21] + "";
+    	let t_value = /*tick*/ ctx[18] + "";
     	let t;
     	let g_class_value;
     	let g_transform_value;
@@ -22153,13 +22327,13 @@ var app = (function () {
     			t = text(t_value);
     			attr_dev(line, "x2", "100%");
     			attr_dev(line, "class", "svelte-18uebyv");
-    			add_location(line, file$3, 73, 5, 2229);
+    			add_location(line, file$3, 68, 5, 2132);
     			attr_dev(text_1, "y", "-4");
     			attr_dev(text_1, "class", "svelte-18uebyv");
-    			add_location(text_1, file$3, 74, 5, 2258);
-    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[21] + " svelte-18uebyv");
-    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[21]) - /*margin*/ ctx[6].bottom / 2) + ")");
-    			add_location(g, file$3, 72, 4, 2134);
+    			add_location(text_1, file$3, 69, 5, 2161);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[18] + " svelte-18uebyv");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[18]) - /*margin*/ ctx[6].bottom / 2) + ")");
+    			add_location(g, file$3, 67, 4, 2037);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, g, anchor);
@@ -22168,7 +22342,7 @@ var app = (function () {
     			append_dev(text_1, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[21]) - /*margin*/ ctx[6].bottom / 2) + ")")) {
+    			if (dirty & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[18]) - /*margin*/ ctx[6].bottom / 2) + ")")) {
     				attr_dev(g, "transform", g_transform_value);
     			}
     		},
@@ -22181,21 +22355,21 @@ var app = (function () {
     		block,
     		id: create_each_block_2$3.name,
     		type: "each",
-    		source: "(72:3) {#each yTicks as tick}",
+    		source: "(67:3) {#each yTicks as tick}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (82:3) {#each xTicks as tick}
+    // (77:3) {#each xTicks as tick}
     function create_each_block_1$3(ctx) {
     	let g;
     	let line;
     	let line_y__value;
     	let line_y__value_1;
     	let text_1;
-    	let t_value = /*tick*/ ctx[21] + "";
+    	let t_value = /*tick*/ ctx[18] + "";
     	let t;
     	let text_1_y_value;
     	let g_class_value;
@@ -22212,13 +22386,13 @@ var app = (function () {
     			attr_dev(line, "x1", "0");
     			attr_dev(line, "x2", "0");
     			attr_dev(line, "class", "svelte-18uebyv");
-    			add_location(line, file$3, 83, 5, 2487);
+    			add_location(line, file$3, 78, 5, 2390);
     			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[6].bottom - 10));
     			attr_dev(text_1, "class", "svelte-18uebyv");
-    			add_location(text_1, file$3, 84, 5, 2557);
-    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[21] + " svelte-18uebyv");
-    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[21]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")");
-    			add_location(g, file$3, 82, 4, 2387);
+    			add_location(text_1, file$3, 79, 5, 2460);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[18] + " svelte-18uebyv");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[18]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")");
+    			add_location(g, file$3, 77, 4, 2290);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, g, anchor);
@@ -22231,7 +22405,7 @@ var app = (function () {
     				attr_dev(line, "y1", line_y__value);
     			}
 
-    			if (dirty & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[21]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")")) {
+    			if (dirty & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[18]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[6].top / 2) + ")")) {
     				attr_dev(g, "transform", g_transform_value);
     			}
     		},
@@ -22244,14 +22418,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1$3.name,
     		type: "each",
-    		source: "(82:3) {#each xTicks as tick}",
+    		source: "(77:3) {#each xTicks as tick}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (90:8) {#each data as d, i}
+    // (85:8) {#each data as d, i}
     function create_each_block$3(ctx) {
     	let circle;
     	let circle_cx_value;
@@ -22263,20 +22437,20 @@ var app = (function () {
     			circle = svg_element("circle");
     			attr_dev(circle, "class", "circle-line svelte-18uebyv");
     			attr_dev(circle, "r", /*r*/ ctx[5]);
-    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[18][0]));
-    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[18][1]));
-    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[9](/*d*/ ctx[18][2]));
-    			add_location(circle, file$3, 90, 12, 2670);
+    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[15][0]));
+    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[15][1]));
+    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[9](/*d*/ ctx[15][2]));
+    			add_location(circle, file$3, 85, 12, 2573);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, circle, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[18][0]))) {
+    			if (dirty & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[15][0]))) {
     				attr_dev(circle, "cx", circle_cx_value);
     			}
 
-    			if (dirty & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[18][1]))) {
+    			if (dirty & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[15][1]))) {
     				attr_dev(circle, "cy", circle_cy_value);
     			}
     		},
@@ -22289,7 +22463,7 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(90:8) {#each data as d, i}",
+    		source: "(85:8) {#each data as d, i}",
     		ctx
     	});
 
@@ -22349,14 +22523,14 @@ var app = (function () {
 
     			attr_dev(g0, "class", "axis y-axis");
     			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[6].top + ")");
-    			add_location(g0, file$3, 70, 2, 2041);
+    			add_location(g0, file$3, 65, 2, 1944);
     			attr_dev(g1, "class", "axis x-axis svelte-18uebyv");
-    			add_location(g1, file$3, 80, 2, 2333);
+    			add_location(g1, file$3, 75, 2, 2236);
     			attr_dev(svg, "class", "svelte-18uebyv");
-    			add_location(svg, file$3, 68, 1, 2015);
+    			add_location(svg, file$3, 63, 1, 1918);
     			attr_dev(div, "class", "chart svelte-18uebyv");
     			add_render_callback(() => /*div_elementresize_handler*/ ctx[10].call(div));
-    			add_location(div, file$3, 67, 0, 1942);
+    			add_location(div, file$3, 62, 0, 1845);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -22502,7 +22676,6 @@ var app = (function () {
     	let data = read_csv$1("umato-large.csv");
     	let r = 2.5;
     	let textMargin = 7;
-    	let el;
     	let hs = false;
     	let targetIndex = -1;
     	const margin = { top: 30, right: 15, bottom: 30, left: 25 };
@@ -22558,7 +22731,6 @@ var app = (function () {
     		data,
     		r,
     		textMargin,
-    		el,
     		hs,
     		targetIndex,
     		svgWidth: svgWidth$3,
@@ -22571,30 +22743,23 @@ var app = (function () {
     		colorDomain,
     		colorScale,
     		xScale,
-    		yScale,
-    		minX,
-    		maxX
+    		yScale
     	});
 
     	$$self.$inject_state = $$props => {
     		if ("data" in $$props) $$invalidate(4, data = $$props.data);
     		if ("r" in $$props) $$invalidate(5, r = $$props.r);
     		if ("textMargin" in $$props) textMargin = $$props.textMargin;
-    		if ("el" in $$props) el = $$props.el;
     		if ("hs" in $$props) hs = $$props.hs;
     		if ("targetIndex" in $$props) targetIndex = $$props.targetIndex;
     		if ("width" in $$props) $$invalidate(0, width = $$props.width);
     		if ("height" in $$props) $$invalidate(1, height = $$props.height);
     		if ("xScale" in $$props) $$invalidate(2, xScale = $$props.xScale);
     		if ("yScale" in $$props) $$invalidate(3, yScale = $$props.yScale);
-    		if ("minX" in $$props) minX = $$props.minX;
-    		if ("maxX" in $$props) maxX = $$props.maxX;
     	};
 
     	let xScale;
     	let yScale;
-    	let minX;
-    	let maxX;
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
@@ -22609,9 +22774,6 @@ var app = (function () {
     			 $$invalidate(3, yScale = linear$2().domain([Math.min.apply(null, yTicks), Math.max.apply(null, yTicks)]).range([height - margin.bottom, margin.top]));
     		}
     	};
-
-    	 minX = min(data, d => d.iter);
-    	 maxX = max(data, d => d.iter);
 
     	return [
     		width,
@@ -22642,18 +22804,737 @@ var app = (function () {
     	}
     }
 
-    /* src\App.svelte generated by Svelte v3.24.1 */
+    const subscriber_queue = [];
+    /**
+     * Create a `Writable` store that allows both updating and reading by subscription.
+     * @param {*=}value initial value
+     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+     */
+    function writable(value, start = noop) {
+        let stop;
+        const subscribers = [];
+        function set(new_value) {
+            if (safe_not_equal(value, new_value)) {
+                value = new_value;
+                if (stop) { // store is ready
+                    const run_queue = !subscriber_queue.length;
+                    for (let i = 0; i < subscribers.length; i += 1) {
+                        const s = subscribers[i];
+                        s[1]();
+                        subscriber_queue.push(s, value);
+                    }
+                    if (run_queue) {
+                        for (let i = 0; i < subscriber_queue.length; i += 2) {
+                            subscriber_queue[i][0](subscriber_queue[i + 1]);
+                        }
+                        subscriber_queue.length = 0;
+                    }
+                }
+            }
+        }
+        function update(fn) {
+            set(fn(value));
+        }
+        function subscribe(run, invalidate = noop) {
+            const subscriber = [run, invalidate];
+            subscribers.push(subscriber);
+            if (subscribers.length === 1) {
+                stop = start(set) || noop;
+            }
+            run(value);
+            return () => {
+                const index = subscribers.indexOf(subscriber);
+                if (index !== -1) {
+                    subscribers.splice(index, 1);
+                }
+                if (subscribers.length === 0) {
+                    stop();
+                    stop = null;
+                }
+            };
+        }
+        return { set, update, subscribe };
+    }
 
-    const { Object: Object_1, console: console_1 } = globals;
-    const file$4 = "src\\App.svelte";
+    function is_date(obj) {
+        return Object.prototype.toString.call(obj) === '[object Date]';
+    }
+
+    function get_interpolator(a, b) {
+        if (a === b || a !== a)
+            return () => a;
+        const type = typeof a;
+        if (type !== typeof b || Array.isArray(a) !== Array.isArray(b)) {
+            throw new Error('Cannot interpolate values of different type');
+        }
+        if (Array.isArray(a)) {
+            const arr = b.map((bi, i) => {
+                return get_interpolator(a[i], bi);
+            });
+            return t => arr.map(fn => fn(t));
+        }
+        if (type === 'object') {
+            if (!a || !b)
+                throw new Error('Object cannot be null');
+            if (is_date(a) && is_date(b)) {
+                a = a.getTime();
+                b = b.getTime();
+                const delta = b - a;
+                return t => new Date(a + t * delta);
+            }
+            const keys = Object.keys(b);
+            const interpolators = {};
+            keys.forEach(key => {
+                interpolators[key] = get_interpolator(a[key], b[key]);
+            });
+            return t => {
+                const result = {};
+                keys.forEach(key => {
+                    result[key] = interpolators[key](t);
+                });
+                return result;
+            };
+        }
+        if (type === 'number') {
+            const delta = b - a;
+            return t => a + t * delta;
+        }
+        throw new Error(`Cannot interpolate ${type} values`);
+    }
+    function tweened(value, defaults = {}) {
+        const store = writable(value);
+        let task;
+        let target_value = value;
+        function set(new_value, opts) {
+            if (value == null) {
+                store.set(value = new_value);
+                return Promise.resolve();
+            }
+            target_value = new_value;
+            let previous_task = task;
+            let started = false;
+            let { delay = 0, duration = 400, easing = identity, interpolate = get_interpolator } = assign(assign({}, defaults), opts);
+            if (duration === 0) {
+                if (previous_task) {
+                    previous_task.abort();
+                    previous_task = null;
+                }
+                store.set(value = target_value);
+                return Promise.resolve();
+            }
+            const start = now() + delay;
+            let fn;
+            task = loop(now => {
+                if (now < start)
+                    return true;
+                if (!started) {
+                    fn = interpolate(value, new_value);
+                    if (typeof duration === 'function')
+                        duration = duration(value, new_value);
+                    started = true;
+                }
+                if (previous_task) {
+                    previous_task.abort();
+                    previous_task = null;
+                }
+                const elapsed = now - start;
+                if (elapsed > duration) {
+                    store.set(value = new_value);
+                    return false;
+                }
+                // @ts-ignore
+                store.set(value = fn(easing(elapsed / duration)));
+                return true;
+            });
+            return task.promise;
+        }
+        return {
+            set,
+            update: (fn, opts) => set(fn(target_value, value), opts),
+            subscribe: store.subscribe
+        };
+    }
+
+    var data$2 = {"0":[{x1:3.0238857,x2:3.0025454,label:8},{x1:5.0730195,x2:5.0640106,label:1},{x1:4.985973,x2:5.0323467,label:1},{x1:5.0743985,x2:4.9841146,label:0},{x1:4.969966,x2:5.0315638,label:0},{x1:5.0020294,x2:5.109913,label:0},{x1:4.921217,x2:5.1024876,label:0},{x1:4.943262,x2:4.9450727,label:5},{x1:4.921423,x2:5.029999,label:7},{x1:4.9949994,x2:4.9939504,label:3},{x1:4.9566298,x2:4.9186583,label:5},{x1:5.0280704,x2:4.9878817,label:5},{x1:4.9793706,x2:5.078128,label:1},{x1:5.0345693,x2:5.0340977,label:1},{x1:5.034451,x2:4.937491,label:5},{x1:5.0428348,x2:5.0202417,label:9},{x1:5.0354443,x2:4.958565,label:1},{x1:4.9238825,x2:4.9462905,label:0},{x1:5.0260863,x2:4.890396,label:8},{x1:4.970404,x2:5.072728,label:7},{x1:4.9698176,x2:4.91448,label:5},{x1:5.0165915,x2:5.0703144,label:1},{x1:4.99346,x2:4.951056,label:9},{x1:5.0068183,x2:5.0421424,label:9},{x1:4.961132,x2:4.99246,label:8},{x1:4.950137,x2:4.964626,label:8},{x1:5.0101213,x2:4.9365034,label:8},{x1:4.986503,x2:5.103631,label:7},{x1:4.925618,x2:4.9782953,label:3},{x1:5.044324,x2:5.1003704,label:1},{x1:5.0281224,x2:5.0037746,label:0},{x1:4.9873147,x2:4.923618,label:9},{x1:4.993277,x2:4.9777665,label:9},{x1:5.022042,x2:4.9460764,label:5},{x1:4.9222293,x2:4.999626,label:3},{x1:4.9928102,x2:4.9366894,label:0},{x1:4.96461,x2:4.9544644,label:5},{x1:5.024307,x2:4.975915,label:8},{x1:4.942553,x2:5.001296,label:7},{x1:4.9758406,x2:4.9045177,label:5},{x1:5.0627093,x2:5.080565,label:4},{x1:5.045799,x2:5.066696,label:1},{x1:4.9345202,x2:4.937325,label:0},{x1:5.019631,x2:5.035519,label:9},{x1:4.9152703,x2:5.055007,label:7},{x1:5.090331,x2:5.094959,label:1},{x1:4.9858046,x2:5.041125,label:0},{x1:4.883947,x2:4.9683237,label:3},{x1:4.9326115,x2:5.075505,label:1},{x1:5.1082196,x2:5.010051,label:8},{x1:4.9056077,x2:5.0342135,label:7},{x1:5.0295644,x2:4.981297,label:4},{x1:4.967837,x2:5.0668554,label:4},{x1:4.8944964,x2:5.038494,label:0},{x1:4.95784,x2:5.011743,label:7},{x1:4.9613676,x2:5.0168366,label:7},{x1:5.0592914,x2:4.949244,label:6},{x1:5.0613475,x2:5.0610766,label:2},{x1:5.086,x2:5.062617,label:2},{x1:5.0051517,x2:5.0692744,label:3},{x1:4.915011,x2:5.0481057,label:3},{x1:4.9412694,x2:5.0475965,label:3},{x1:4.9795647,x2:4.8855796,label:5},{x1:4.9803433,x2:4.952815,label:4},{x1:5.015673,x2:4.989367,label:9},{x1:4.93906,x2:5.0003343,label:9},{x1:4.9424906,x2:5.0869117,label:3},{x1:5.06995,x2:4.924972,label:5},{x1:4.9084454,x2:5.0621543,label:3},{x1:4.975113,x2:4.9572787,label:8},{x1:4.939524,x2:5.0963283,label:7},{x1:5.0151215,x2:4.9253893,label:6},{x1:4.8873506,x2:5.025169,label:3},{x1:4.972046,x2:4.9618654,label:2},{x1:4.9224305,x2:4.932069,label:6},{x1:5.0069747,x2:5.05747,label:8},{x1:5.0432577,x2:4.959106,label:6},{x1:4.999109,x2:5.0429654,label:4},{x1:5.022353,x2:5.0186443,label:2},{x1:5.008718,x2:4.9043546,label:6},{x1:5.0149665,x2:5.109521,label:4},{x1:4.8902135,x2:5.019852,label:7},{x1:4.9623995,x2:5.0637517,label:2},{x1:5.0866823,x2:4.9790187,label:9},{x1:4.919269,x2:4.9210105,label:6},{x1:5.035858,x2:4.957706,label:4},{x1:5.0743117,x2:5.0363708,label:2},{x1:5.090505,x2:4.9940815,label:2},{x1:5.0113344,x2:4.902892,label:8},{x1:4.997383,x2:4.9064283,label:9},{x1:5.017212,x2:4.9287343,label:6},{x1:4.936757,x2:4.926679,label:6},{x1:4.924654,x2:4.995019,label:2},{x1:5.0022054,x2:4.859994,label:6},{x1:5.0560236,x2:4.9846964,label:4},{x1:5.0010514,x2:5.0236154,label:4},{x1:5.0455523,x2:4.9577665,label:2},{x1:4.957381,x2:4.9743276,label:6},{x1:5.0818796,x2:4.9630256,label:4},{x1:5.0839887,x2:5.030184,label:2},{x1:0.17185508,x2:4.1812534,label:10},{x1:4.142664,x2:0.14585076,label:10},{x1:9.11608,x2:7.6306148,label:10},{x1:4.552967,x2:0.07418687,label:10},{x1:5.031228,x2:10,label:10},{x1:0.11281484,x2:4.0989027,label:10},{x1:5.9655724,x2:0.246195,label:10},{x1:9.773999,x2:3.7964873,label:10},{x1:0.67153215,x2:7.4471474,label:10},{x1:0.36274716,x2:6.6898894,label:10},{x1:9.193901,x2:2.3453,label:10},{x1:2.961097,x2:9.487203,label:10},{x1:0.29576683,x2:3.650964,label:10},{x1:0.7094731,x2:2.503096,label:10},{x1:0.077677555,x2:5.0040007,label:10},{x1:3.4837232,x2:9.722749,label:10},{x1:5.3230877,x2:0.09721083,label:10},{x1:0.62322915,x2:2.581145,label:10},{x1:0.21906397,x2:3.947635,label:10},{x1:7.3808537,x2:9.380716,label:10},{x1:9.639446,x2:3.2159948,label:10},{x1:0.58632606,x2:7.1452236,label:10},{x1:3.014697,x2:0.4440848,label:10},{x1:1.049806,x2:2.1243634,label:10},{x1:9.776316,x2:3.677181,label:10},{x1:9.081136,x2:7.7157764,label:10},{x1:8.836035,x2:8.221111,label:10},{x1:0.16784155,x2:5.7238297,label:10},{x1:6.998462,x2:0.49659404,label:10},{x1:7.5737143,x2:0.83231807,label:10},{x1:4.508965,x2:9.882044,label:10},{x1:7.527604,x2:0.88057834,label:10},{x1:4.707372,x2:9.97747,label:10},{x1:3.428017,x2:9.666003,label:10},{x1:10,x2:4.85359,label:10},{x1:0.032964226,x2:4.667385,label:10},{x1:8.679375,x2:1.7676159,label:10},{x1:7.0098553,x2:0.50273794,label:10},{x1:2.9884276,x2:9.434984,label:10},{x1:6.3030634,x2:9.78222,label:10},{x1:1.3071626,x2:1.8007735,label:10},{x1:7.1336665,x2:9.389765,label:10},{x1:1.4636902,x2:8.472743,label:10},{x1:6.3832755,x2:0.2509541,label:10},{x1:0.39451918,x2:6.927227,label:10},{x1:9.412301,x2:2.8711052,label:10},{x1:0.15664582,x2:6.0400834,label:10},{x1:8.127779,x2:8.826495,label:10},{x1:3.4652097,x2:0.33327076,label:10},{x1:9.842323,x2:4.48198,label:10},{x1:9.686273,x2:3.1884503,label:10},{x1:9.9291315,x2:4.1561074,label:10},{x1:0.96984863,x2:7.9656396,label:10},{x1:1.3467264,x2:1.6527804,label:10},{x1:0,x2:5.395362,label:10},{x1:9.248395,x2:7.3768435,label:10},{x1:8.66095,x2:1.7216151,label:10},{x1:9.392071,x2:7.1867976,label:10},{x1:4.266693,x2:0.05772239,label:10},{x1:6.103763,x2:0.2061382,label:10},{x1:4.8048987,x2:0,label:10},{x1:9.886054,x2:5.8564053,label:10},{x1:0.50934833,x2:2.9053957,label:10},{x1:2.3884928,x2:0.83952785,label:10},{x1:5.5341177,x2:9.829651,label:10},{x1:2.388731,x2:9.113775,label:10},{x1:8.291733,x2:1.3363142,label:10},{x1:1.9640036,x2:8.939258,label:10},{x1:9.493931,x2:7.01815,label:10},{x1:2.0423875,x2:0.9737987,label:10},{x1:0.37485844,x2:3.4564848,label:10},{x1:7.1699057,x2:9.46011,label:10},{x1:8.861256,x2:8.245877,label:10},{x1:3.645735,x2:9.7154255,label:10},{x1:9.74814,x2:6.3591795,label:10},{x1:9.002591,x2:2.0221906,label:10},{x1:5.6317616,x2:0.1595877,label:10},{x1:7.9866614,x2:8.960461,label:10},{x1:2.0944946,x2:1.0511646,label:10},{x1:3.657294,x2:0.24120656,label:10},{x1:2.6978712,x2:0.5634593,label:10},{x1:0.05346329,x2:5.881465,label:10},{x1:1.1316464,x2:8.032728,label:10},{x1:9.95426,x2:5.0538116,label:10},{x1:2.2714138,x2:0.800496,label:10},{x1:1.2220763,x2:8.187496,label:10},{x1:6.8605647,x2:0.4121502,label:10},{x1:9.798297,x2:6.1023273,label:10},{x1:1.0201107,x2:2.0807052,label:10},{x1:5.808787,x2:9.772753,label:10},{x1:6.191328,x2:9.755719,label:10},{x1:5.1729484,x2:9.93665,label:10},{x1:7.49984,x2:9.232105,label:10},{x1:1.441769,x2:8.566045,label:10},{x1:8.623273,x2:8.365911,label:10},{x1:4.565543,x2:9.863519,label:10},{x1:2.0012963,x2:8.916913,label:10},{x1:9.356578,x2:2.623774,label:10},{x1:8.176522,x2:1.1368941,label:10},{x1:9.868322,x2:5.445537,label:10}],"1":[{x1:4.0238857,x2:4.0025454,label:8},{x1:3.5730195,x2:3.5640106,label:1},{x1:4.985973,x2:5.0323467,label:1},{x1:5.0743985,x2:4.9841146,label:0},{x1:4.969966,x2:5.0315638,label:0},{x1:5.0020294,x2:5.109913,label:0},{x1:4.921217,x2:5.1024876,label:0},{x1:4.943262,x2:4.9450727,label:5},{x1:4.921423,x2:5.029999,label:7},{x1:4.9949994,x2:4.9939504,label:3},{x1:4.9566298,x2:4.9186583,label:5},{x1:5.0280704,x2:4.9878817,label:5},{x1:4.9793706,x2:5.078128,label:1},{x1:5.0345693,x2:5.0340977,label:1},{x1:5.034451,x2:4.937491,label:5},{x1:5.0428348,x2:5.0202417,label:9},{x1:5.0354443,x2:4.958565,label:1},{x1:4.9238825,x2:4.9462905,label:0},{x1:5.0260863,x2:4.890396,label:8},{x1:4.970404,x2:5.072728,label:7},{x1:4.9698176,x2:4.91448,label:5},{x1:5.0165915,x2:5.0703144,label:1},{x1:4.99346,x2:4.951056,label:9},{x1:5.0068183,x2:5.0421424,label:9},{x1:4.961132,x2:4.99246,label:8},{x1:4.950137,x2:4.964626,label:8},{x1:5.0101213,x2:4.9365034,label:8},{x1:4.986503,x2:5.103631,label:7},{x1:4.925618,x2:4.9782953,label:3},{x1:5.044324,x2:5.1003704,label:1},{x1:5.0281224,x2:5.0037746,label:0},{x1:4.9873147,x2:4.923618,label:9},{x1:4.993277,x2:4.9777665,label:9},{x1:5.022042,x2:4.9460764,label:5},{x1:4.9222293,x2:4.999626,label:3},{x1:4.9928102,x2:4.9366894,label:0},{x1:4.96461,x2:4.9544644,label:5},{x1:5.024307,x2:4.975915,label:8},{x1:4.942553,x2:5.001296,label:7},{x1:4.9758406,x2:4.9045177,label:5},{x1:5.0627093,x2:5.080565,label:4},{x1:5.045799,x2:5.066696,label:1},{x1:4.9345202,x2:4.937325,label:0},{x1:5.019631,x2:5.035519,label:9},{x1:4.9152703,x2:5.055007,label:7},{x1:5.090331,x2:5.094959,label:1},{x1:4.9858046,x2:5.041125,label:0},{x1:4.883947,x2:4.9683237,label:3},{x1:4.9326115,x2:5.075505,label:1},{x1:5.1082196,x2:5.010051,label:8},{x1:4.9056077,x2:5.0342135,label:7},{x1:5.0295644,x2:4.981297,label:4},{x1:4.967837,x2:5.0668554,label:4},{x1:4.8944964,x2:5.038494,label:0},{x1:4.95784,x2:5.011743,label:7},{x1:4.9613676,x2:5.0168366,label:7},{x1:5.0592914,x2:4.949244,label:6},{x1:5.0613475,x2:5.0610766,label:2},{x1:5.086,x2:5.062617,label:2},{x1:5.0051517,x2:5.0692744,label:3},{x1:4.915011,x2:5.0481057,label:3},{x1:4.9412694,x2:5.0475965,label:3},{x1:4.9795647,x2:4.8855796,label:5},{x1:4.9803433,x2:4.952815,label:4},{x1:5.015673,x2:4.989367,label:9},{x1:4.93906,x2:5.0003343,label:9},{x1:4.9424906,x2:5.0869117,label:3},{x1:5.06995,x2:4.924972,label:5},{x1:4.9084454,x2:5.0621543,label:3},{x1:4.975113,x2:4.9572787,label:8},{x1:4.939524,x2:5.0963283,label:7},{x1:5.0151215,x2:4.9253893,label:6},{x1:4.8873506,x2:5.025169,label:3},{x1:4.972046,x2:4.9618654,label:2},{x1:4.9224305,x2:4.932069,label:6},{x1:5.0069747,x2:5.05747,label:8},{x1:5.0432577,x2:4.959106,label:6},{x1:4.999109,x2:5.0429654,label:4},{x1:5.022353,x2:5.0186443,label:2},{x1:5.008718,x2:4.9043546,label:6},{x1:5.0149665,x2:5.109521,label:4},{x1:4.8902135,x2:5.019852,label:7},{x1:4.9623995,x2:5.0637517,label:2},{x1:5.0866823,x2:4.9790187,label:9},{x1:4.919269,x2:4.9210105,label:6},{x1:5.035858,x2:4.957706,label:4},{x1:5.0743117,x2:5.0363708,label:2},{x1:5.090505,x2:4.9940815,label:2},{x1:5.0113344,x2:4.902892,label:8},{x1:4.997383,x2:4.9064283,label:9},{x1:5.017212,x2:4.9287343,label:6},{x1:4.936757,x2:4.926679,label:6},{x1:4.924654,x2:4.995019,label:2},{x1:5.0022054,x2:4.859994,label:6},{x1:5.0560236,x2:4.9846964,label:4},{x1:5.0010514,x2:5.0236154,label:4},{x1:5.0455523,x2:4.9577665,label:2},{x1:4.957381,x2:4.9743276,label:6},{x1:5.0818796,x2:4.9630256,label:4},{x1:5.0839887,x2:5.030184,label:2},{x1:0.17185508,x2:4.1812534,label:10},{x1:4.142664,x2:0.14585076,label:10},{x1:9.11608,x2:7.6306148,label:10},{x1:4.552967,x2:0.07418687,label:10},{x1:5.031228,x2:10,label:10},{x1:0.11281484,x2:4.0989027,label:10},{x1:5.9655724,x2:0.246195,label:10},{x1:9.773999,x2:3.7964873,label:10},{x1:0.67153215,x2:7.4471474,label:10},{x1:0.36274716,x2:6.6898894,label:10},{x1:9.193901,x2:2.3453,label:10},{x1:2.961097,x2:9.487203,label:10},{x1:0.29576683,x2:3.650964,label:10},{x1:0.7094731,x2:2.503096,label:10},{x1:0.077677555,x2:5.0040007,label:10},{x1:3.4837232,x2:9.722749,label:10},{x1:5.3230877,x2:0.09721083,label:10},{x1:0.62322915,x2:2.581145,label:10},{x1:0.21906397,x2:3.947635,label:10},{x1:7.3808537,x2:9.380716,label:10},{x1:9.639446,x2:3.2159948,label:10},{x1:0.58632606,x2:7.1452236,label:10},{x1:3.014697,x2:0.4440848,label:10},{x1:1.049806,x2:2.1243634,label:10},{x1:9.776316,x2:3.677181,label:10},{x1:9.081136,x2:7.7157764,label:10},{x1:8.836035,x2:8.221111,label:10},{x1:0.16784155,x2:5.7238297,label:10},{x1:6.998462,x2:0.49659404,label:10},{x1:7.5737143,x2:0.83231807,label:10},{x1:4.508965,x2:9.882044,label:10},{x1:7.527604,x2:0.88057834,label:10},{x1:4.707372,x2:9.97747,label:10},{x1:3.428017,x2:9.666003,label:10},{x1:10,x2:4.85359,label:10},{x1:0.032964226,x2:4.667385,label:10},{x1:8.679375,x2:1.7676159,label:10},{x1:7.0098553,x2:0.50273794,label:10},{x1:2.9884276,x2:9.434984,label:10},{x1:6.3030634,x2:9.78222,label:10},{x1:1.3071626,x2:1.8007735,label:10},{x1:7.1336665,x2:9.389765,label:10},{x1:1.4636902,x2:8.472743,label:10},{x1:6.3832755,x2:0.2509541,label:10},{x1:0.39451918,x2:6.927227,label:10},{x1:9.412301,x2:2.8711052,label:10},{x1:0.15664582,x2:6.0400834,label:10},{x1:8.127779,x2:8.826495,label:10},{x1:3.4652097,x2:0.33327076,label:10},{x1:9.842323,x2:4.48198,label:10},{x1:9.686273,x2:3.1884503,label:10},{x1:9.9291315,x2:4.1561074,label:10},{x1:0.96984863,x2:7.9656396,label:10},{x1:1.3467264,x2:1.6527804,label:10},{x1:0,x2:5.395362,label:10},{x1:9.248395,x2:7.3768435,label:10},{x1:8.66095,x2:1.7216151,label:10},{x1:9.392071,x2:7.1867976,label:10},{x1:4.266693,x2:0.05772239,label:10},{x1:6.103763,x2:0.2061382,label:10},{x1:4.8048987,x2:0,label:10},{x1:9.886054,x2:5.8564053,label:10},{x1:0.50934833,x2:2.9053957,label:10},{x1:2.3884928,x2:0.83952785,label:10},{x1:5.5341177,x2:9.829651,label:10},{x1:2.388731,x2:9.113775,label:10},{x1:8.291733,x2:1.3363142,label:10},{x1:1.9640036,x2:8.939258,label:10},{x1:9.493931,x2:7.01815,label:10},{x1:2.0423875,x2:0.9737987,label:10},{x1:0.37485844,x2:3.4564848,label:10},{x1:7.1699057,x2:9.46011,label:10},{x1:8.861256,x2:8.245877,label:10},{x1:3.645735,x2:9.7154255,label:10},{x1:9.74814,x2:6.3591795,label:10},{x1:9.002591,x2:2.0221906,label:10},{x1:5.6317616,x2:0.1595877,label:10},{x1:7.9866614,x2:8.960461,label:10},{x1:2.0944946,x2:1.0511646,label:10},{x1:3.657294,x2:0.24120656,label:10},{x1:2.6978712,x2:0.5634593,label:10},{x1:0.05346329,x2:5.881465,label:10},{x1:1.1316464,x2:8.032728,label:10},{x1:9.95426,x2:5.0538116,label:10},{x1:2.2714138,x2:0.800496,label:10},{x1:1.2220763,x2:8.187496,label:10},{x1:6.8605647,x2:0.4121502,label:10},{x1:9.798297,x2:6.1023273,label:10},{x1:1.0201107,x2:2.0807052,label:10},{x1:5.808787,x2:9.772753,label:10},{x1:6.191328,x2:9.755719,label:10},{x1:5.1729484,x2:9.93665,label:10},{x1:7.49984,x2:9.232105,label:10},{x1:1.441769,x2:8.566045,label:10},{x1:8.623273,x2:8.365911,label:10},{x1:4.565543,x2:9.863519,label:10},{x1:2.0012963,x2:8.916913,label:10},{x1:9.356578,x2:2.623774,label:10},{x1:8.176522,x2:1.1368941,label:10},{x1:9.868322,x2:5.445537,label:10}],"2":[{x1:1.0238857,x2:1.0025454,label:8},{x1:3.5730195,x2:3.5640106,label:1},{x1:4.985973,x2:5.0323467,label:1},{x1:5.0743985,x2:4.9841146,label:0},{x1:4.969966,x2:5.0315638,label:0},{x1:5.0020294,x2:5.109913,label:0},{x1:4.921217,x2:5.1024876,label:0},{x1:4.943262,x2:4.9450727,label:5},{x1:4.921423,x2:5.029999,label:7},{x1:4.9949994,x2:4.9939504,label:3},{x1:4.9566298,x2:4.9186583,label:5},{x1:5.0280704,x2:4.9878817,label:5},{x1:4.9793706,x2:5.078128,label:1},{x1:5.0345693,x2:5.0340977,label:1},{x1:5.034451,x2:4.937491,label:5},{x1:5.0428348,x2:5.0202417,label:9},{x1:5.0354443,x2:4.958565,label:1},{x1:4.9238825,x2:4.9462905,label:0},{x1:5.0260863,x2:4.890396,label:8},{x1:4.970404,x2:5.072728,label:7},{x1:4.9698176,x2:4.91448,label:5},{x1:5.0165915,x2:5.0703144,label:1},{x1:4.99346,x2:4.951056,label:9},{x1:5.0068183,x2:5.0421424,label:9},{x1:4.961132,x2:4.99246,label:8},{x1:4.950137,x2:4.964626,label:8},{x1:5.0101213,x2:4.9365034,label:8},{x1:4.986503,x2:5.103631,label:7},{x1:4.925618,x2:4.9782953,label:3},{x1:5.044324,x2:5.1003704,label:1},{x1:5.0281224,x2:5.0037746,label:0},{x1:4.9873147,x2:4.923618,label:9},{x1:4.993277,x2:4.9777665,label:9},{x1:5.022042,x2:4.9460764,label:5},{x1:4.9222293,x2:4.999626,label:3},{x1:4.9928102,x2:4.9366894,label:0},{x1:4.96461,x2:4.9544644,label:5},{x1:5.024307,x2:4.975915,label:8},{x1:4.942553,x2:5.001296,label:7},{x1:4.9758406,x2:4.9045177,label:5},{x1:5.0627093,x2:5.080565,label:4},{x1:5.045799,x2:5.066696,label:1},{x1:4.9345202,x2:4.937325,label:0},{x1:5.019631,x2:5.035519,label:9},{x1:4.9152703,x2:5.055007,label:7},{x1:5.090331,x2:5.094959,label:1},{x1:4.9858046,x2:5.041125,label:0},{x1:4.883947,x2:4.9683237,label:3},{x1:4.9326115,x2:5.075505,label:1},{x1:5.1082196,x2:5.010051,label:8},{x1:4.9056077,x2:5.0342135,label:7},{x1:5.0295644,x2:4.981297,label:4},{x1:4.967837,x2:5.0668554,label:4},{x1:4.8944964,x2:5.038494,label:0},{x1:4.95784,x2:5.011743,label:7},{x1:4.9613676,x2:5.0168366,label:7},{x1:5.0592914,x2:4.949244,label:6},{x1:5.0613475,x2:5.0610766,label:2},{x1:5.086,x2:5.062617,label:2},{x1:5.0051517,x2:5.0692744,label:3},{x1:4.915011,x2:5.0481057,label:3},{x1:4.9412694,x2:5.0475965,label:3},{x1:4.9795647,x2:4.8855796,label:5},{x1:4.9803433,x2:4.952815,label:4},{x1:5.015673,x2:4.989367,label:9},{x1:4.93906,x2:5.0003343,label:9},{x1:4.9424906,x2:5.0869117,label:3},{x1:5.06995,x2:4.924972,label:5},{x1:4.9084454,x2:5.0621543,label:3},{x1:4.975113,x2:4.9572787,label:8},{x1:4.939524,x2:5.0963283,label:7},{x1:5.0151215,x2:4.9253893,label:6},{x1:4.8873506,x2:5.025169,label:3},{x1:4.972046,x2:4.9618654,label:2},{x1:4.9224305,x2:4.932069,label:6},{x1:5.0069747,x2:5.05747,label:8},{x1:5.0432577,x2:4.959106,label:6},{x1:4.999109,x2:5.0429654,label:4},{x1:5.022353,x2:5.0186443,label:2},{x1:5.008718,x2:4.9043546,label:6},{x1:5.0149665,x2:5.109521,label:4},{x1:4.8902135,x2:5.019852,label:7},{x1:4.9623995,x2:5.0637517,label:2},{x1:5.0866823,x2:4.9790187,label:9},{x1:4.919269,x2:4.9210105,label:6},{x1:5.035858,x2:4.957706,label:4},{x1:5.0743117,x2:5.0363708,label:2},{x1:5.090505,x2:4.9940815,label:2},{x1:5.0113344,x2:4.902892,label:8},{x1:4.997383,x2:4.9064283,label:9},{x1:5.017212,x2:4.9287343,label:6},{x1:4.936757,x2:4.926679,label:6},{x1:4.924654,x2:4.995019,label:2},{x1:5.0022054,x2:4.859994,label:6},{x1:5.0560236,x2:4.9846964,label:4},{x1:5.0010514,x2:5.0236154,label:4},{x1:5.0455523,x2:4.9577665,label:2},{x1:4.957381,x2:4.9743276,label:6},{x1:5.0818796,x2:4.9630256,label:4},{x1:5.0839887,x2:5.030184,label:2},{x1:0.17185508,x2:4.1812534,label:10},{x1:4.142664,x2:0.14585076,label:10},{x1:9.11608,x2:7.6306148,label:10},{x1:4.552967,x2:0.07418687,label:10},{x1:5.031228,x2:10,label:10},{x1:0.11281484,x2:4.0989027,label:10},{x1:5.9655724,x2:0.246195,label:10},{x1:9.773999,x2:3.7964873,label:10},{x1:0.67153215,x2:7.4471474,label:10},{x1:0.36274716,x2:6.6898894,label:10},{x1:9.193901,x2:2.3453,label:10},{x1:2.961097,x2:9.487203,label:10},{x1:0.29576683,x2:3.650964,label:10},{x1:0.7094731,x2:2.503096,label:10},{x1:0.077677555,x2:5.0040007,label:10},{x1:3.4837232,x2:9.722749,label:10},{x1:5.3230877,x2:0.09721083,label:10},{x1:0.62322915,x2:2.581145,label:10},{x1:0.21906397,x2:3.947635,label:10},{x1:7.3808537,x2:9.380716,label:10},{x1:9.639446,x2:3.2159948,label:10},{x1:0.58632606,x2:7.1452236,label:10},{x1:3.014697,x2:0.4440848,label:10},{x1:1.049806,x2:2.1243634,label:10},{x1:9.776316,x2:3.677181,label:10},{x1:9.081136,x2:7.7157764,label:10},{x1:8.836035,x2:8.221111,label:10},{x1:0.16784155,x2:5.7238297,label:10},{x1:6.998462,x2:0.49659404,label:10},{x1:7.5737143,x2:0.83231807,label:10},{x1:4.508965,x2:9.882044,label:10},{x1:7.527604,x2:0.88057834,label:10},{x1:4.707372,x2:9.97747,label:10},{x1:3.428017,x2:9.666003,label:10},{x1:10,x2:4.85359,label:10},{x1:0.032964226,x2:4.667385,label:10},{x1:8.679375,x2:1.7676159,label:10},{x1:7.0098553,x2:0.50273794,label:10},{x1:2.9884276,x2:9.434984,label:10},{x1:6.3030634,x2:9.78222,label:10},{x1:1.3071626,x2:1.8007735,label:10},{x1:7.1336665,x2:9.389765,label:10},{x1:1.4636902,x2:8.472743,label:10},{x1:6.3832755,x2:0.2509541,label:10},{x1:0.39451918,x2:6.927227,label:10},{x1:9.412301,x2:2.8711052,label:10},{x1:0.15664582,x2:6.0400834,label:10},{x1:8.127779,x2:8.826495,label:10},{x1:3.4652097,x2:0.33327076,label:10},{x1:9.842323,x2:4.48198,label:10},{x1:9.686273,x2:3.1884503,label:10},{x1:9.9291315,x2:4.1561074,label:10},{x1:0.96984863,x2:7.9656396,label:10},{x1:1.3467264,x2:1.6527804,label:10},{x1:0,x2:5.395362,label:10},{x1:9.248395,x2:7.3768435,label:10},{x1:8.66095,x2:1.7216151,label:10},{x1:9.392071,x2:7.1867976,label:10},{x1:4.266693,x2:0.05772239,label:10},{x1:6.103763,x2:0.2061382,label:10},{x1:4.8048987,x2:0,label:10},{x1:9.886054,x2:5.8564053,label:10},{x1:0.50934833,x2:2.9053957,label:10},{x1:2.3884928,x2:0.83952785,label:10},{x1:5.5341177,x2:9.829651,label:10},{x1:2.388731,x2:9.113775,label:10},{x1:8.291733,x2:1.3363142,label:10},{x1:1.9640036,x2:8.939258,label:10},{x1:9.493931,x2:7.01815,label:10},{x1:2.0423875,x2:0.9737987,label:10},{x1:0.37485844,x2:3.4564848,label:10},{x1:7.1699057,x2:9.46011,label:10},{x1:8.861256,x2:8.245877,label:10},{x1:3.645735,x2:9.7154255,label:10},{x1:9.74814,x2:6.3591795,label:10},{x1:9.002591,x2:2.0221906,label:10},{x1:5.6317616,x2:0.1595877,label:10},{x1:7.9866614,x2:8.960461,label:10},{x1:2.0944946,x2:1.0511646,label:10},{x1:3.657294,x2:0.24120656,label:10},{x1:2.6978712,x2:0.5634593,label:10},{x1:0.05346329,x2:5.881465,label:10},{x1:1.1316464,x2:8.032728,label:10},{x1:9.95426,x2:5.0538116,label:10},{x1:2.2714138,x2:0.800496,label:10},{x1:1.2220763,x2:8.187496,label:10},{x1:6.8605647,x2:0.4121502,label:10},{x1:9.798297,x2:6.1023273,label:10},{x1:1.0201107,x2:2.0807052,label:10},{x1:5.808787,x2:9.772753,label:10},{x1:6.191328,x2:9.755719,label:10},{x1:5.1729484,x2:9.93665,label:10},{x1:7.49984,x2:9.232105,label:10},{x1:1.441769,x2:8.566045,label:10},{x1:8.623273,x2:8.365911,label:10},{x1:4.565543,x2:9.863519,label:10},{x1:2.0012963,x2:8.916913,label:10},{x1:9.356578,x2:2.623774,label:10},{x1:8.176522,x2:1.1368941,label:10},{x1:9.868322,x2:5.445537,label:10}],"3":[{x1:2.0238857,x2:2.0025454,label:8},{x1:3.5730195,x2:3.5640106,label:1},{x1:4.985973,x2:5.0323467,label:1},{x1:5.0743985,x2:4.9841146,label:0},{x1:4.969966,x2:5.0315638,label:0},{x1:5.0020294,x2:5.109913,label:0},{x1:4.921217,x2:5.1024876,label:0},{x1:4.943262,x2:4.9450727,label:5},{x1:4.921423,x2:5.029999,label:7},{x1:4.9949994,x2:4.9939504,label:3},{x1:4.9566298,x2:4.9186583,label:5},{x1:5.0280704,x2:4.9878817,label:5},{x1:4.9793706,x2:5.078128,label:1},{x1:5.0345693,x2:5.0340977,label:1},{x1:5.034451,x2:4.937491,label:5},{x1:5.0428348,x2:5.0202417,label:9},{x1:5.0354443,x2:4.958565,label:1},{x1:4.9238825,x2:4.9462905,label:0},{x1:5.0260863,x2:4.890396,label:8},{x1:4.970404,x2:5.072728,label:7},{x1:4.9698176,x2:4.91448,label:5},{x1:5.0165915,x2:5.0703144,label:1},{x1:4.99346,x2:4.951056,label:9},{x1:5.0068183,x2:5.0421424,label:9},{x1:4.961132,x2:4.99246,label:8},{x1:4.950137,x2:4.964626,label:8},{x1:5.0101213,x2:4.9365034,label:8},{x1:4.986503,x2:5.103631,label:7},{x1:4.925618,x2:4.9782953,label:3},{x1:5.044324,x2:5.1003704,label:1},{x1:5.0281224,x2:5.0037746,label:0},{x1:4.9873147,x2:4.923618,label:9},{x1:4.993277,x2:4.9777665,label:9},{x1:5.022042,x2:4.9460764,label:5},{x1:4.9222293,x2:4.999626,label:3},{x1:4.9928102,x2:4.9366894,label:0},{x1:4.96461,x2:4.9544644,label:5},{x1:5.024307,x2:4.975915,label:8},{x1:4.942553,x2:5.001296,label:7},{x1:4.9758406,x2:4.9045177,label:5},{x1:5.0627093,x2:5.080565,label:4},{x1:5.045799,x2:5.066696,label:1},{x1:4.9345202,x2:4.937325,label:0},{x1:5.019631,x2:5.035519,label:9},{x1:4.9152703,x2:5.055007,label:7},{x1:5.090331,x2:5.094959,label:1},{x1:4.9858046,x2:5.041125,label:0},{x1:4.883947,x2:4.9683237,label:3},{x1:4.9326115,x2:5.075505,label:1},{x1:5.1082196,x2:5.010051,label:8},{x1:4.9056077,x2:5.0342135,label:7},{x1:5.0295644,x2:4.981297,label:4},{x1:4.967837,x2:5.0668554,label:4},{x1:4.8944964,x2:5.038494,label:0},{x1:4.95784,x2:5.011743,label:7},{x1:4.9613676,x2:5.0168366,label:7},{x1:5.0592914,x2:4.949244,label:6},{x1:5.0613475,x2:5.0610766,label:2},{x1:5.086,x2:5.062617,label:2},{x1:5.0051517,x2:5.0692744,label:3},{x1:4.915011,x2:5.0481057,label:3},{x1:4.9412694,x2:5.0475965,label:3},{x1:4.9795647,x2:4.8855796,label:5},{x1:4.9803433,x2:4.952815,label:4},{x1:5.015673,x2:4.989367,label:9},{x1:4.93906,x2:5.0003343,label:9},{x1:4.9424906,x2:5.0869117,label:3},{x1:5.06995,x2:4.924972,label:5},{x1:4.9084454,x2:5.0621543,label:3},{x1:4.975113,x2:4.9572787,label:8},{x1:4.939524,x2:5.0963283,label:7},{x1:5.0151215,x2:4.9253893,label:6},{x1:4.8873506,x2:5.025169,label:3},{x1:4.972046,x2:4.9618654,label:2},{x1:4.9224305,x2:4.932069,label:6},{x1:5.0069747,x2:5.05747,label:8},{x1:5.0432577,x2:4.959106,label:6},{x1:4.999109,x2:5.0429654,label:4},{x1:5.022353,x2:5.0186443,label:2},{x1:5.008718,x2:4.9043546,label:6},{x1:5.0149665,x2:5.109521,label:4},{x1:4.8902135,x2:5.019852,label:7},{x1:4.9623995,x2:5.0637517,label:2},{x1:5.0866823,x2:4.9790187,label:9},{x1:4.919269,x2:4.9210105,label:6},{x1:5.035858,x2:4.957706,label:4},{x1:5.0743117,x2:5.0363708,label:2},{x1:5.090505,x2:4.9940815,label:2},{x1:5.0113344,x2:4.902892,label:8},{x1:4.997383,x2:4.9064283,label:9},{x1:5.017212,x2:4.9287343,label:6},{x1:4.936757,x2:4.926679,label:6},{x1:4.924654,x2:4.995019,label:2},{x1:5.0022054,x2:4.859994,label:6},{x1:5.0560236,x2:4.9846964,label:4},{x1:5.0010514,x2:5.0236154,label:4},{x1:5.0455523,x2:4.9577665,label:2},{x1:4.957381,x2:4.9743276,label:6},{x1:5.0818796,x2:4.9630256,label:4},{x1:5.0839887,x2:5.030184,label:2},{x1:0.17185508,x2:4.1812534,label:10},{x1:4.142664,x2:0.14585076,label:10},{x1:9.11608,x2:7.6306148,label:10},{x1:4.552967,x2:0.07418687,label:10},{x1:5.031228,x2:10,label:10},{x1:0.11281484,x2:4.0989027,label:10},{x1:5.9655724,x2:0.246195,label:10},{x1:9.773999,x2:3.7964873,label:10},{x1:0.67153215,x2:7.4471474,label:10},{x1:0.36274716,x2:6.6898894,label:10},{x1:9.193901,x2:2.3453,label:10},{x1:2.961097,x2:9.487203,label:10},{x1:0.29576683,x2:3.650964,label:10},{x1:0.7094731,x2:2.503096,label:10},{x1:0.077677555,x2:5.0040007,label:10},{x1:3.4837232,x2:9.722749,label:10},{x1:5.3230877,x2:0.09721083,label:10},{x1:0.62322915,x2:2.581145,label:10},{x1:0.21906397,x2:3.947635,label:10},{x1:7.3808537,x2:9.380716,label:10},{x1:9.639446,x2:3.2159948,label:10},{x1:0.58632606,x2:7.1452236,label:10},{x1:3.014697,x2:0.4440848,label:10},{x1:1.049806,x2:2.1243634,label:10},{x1:9.776316,x2:3.677181,label:10},{x1:9.081136,x2:7.7157764,label:10},{x1:8.836035,x2:8.221111,label:10},{x1:0.16784155,x2:5.7238297,label:10},{x1:6.998462,x2:0.49659404,label:10},{x1:7.5737143,x2:0.83231807,label:10},{x1:4.508965,x2:9.882044,label:10},{x1:7.527604,x2:0.88057834,label:10},{x1:4.707372,x2:9.97747,label:10},{x1:3.428017,x2:9.666003,label:10},{x1:10,x2:4.85359,label:10},{x1:0.032964226,x2:4.667385,label:10},{x1:8.679375,x2:1.7676159,label:10},{x1:7.0098553,x2:0.50273794,label:10},{x1:2.9884276,x2:9.434984,label:10},{x1:6.3030634,x2:9.78222,label:10},{x1:1.3071626,x2:1.8007735,label:10},{x1:7.1336665,x2:9.389765,label:10},{x1:1.4636902,x2:8.472743,label:10},{x1:6.3832755,x2:0.2509541,label:10},{x1:0.39451918,x2:6.927227,label:10},{x1:9.412301,x2:2.8711052,label:10},{x1:0.15664582,x2:6.0400834,label:10},{x1:8.127779,x2:8.826495,label:10},{x1:3.4652097,x2:0.33327076,label:10},{x1:9.842323,x2:4.48198,label:10},{x1:9.686273,x2:3.1884503,label:10},{x1:9.9291315,x2:4.1561074,label:10},{x1:0.96984863,x2:7.9656396,label:10},{x1:1.3467264,x2:1.6527804,label:10},{x1:0,x2:5.395362,label:10},{x1:9.248395,x2:7.3768435,label:10},{x1:8.66095,x2:1.7216151,label:10},{x1:9.392071,x2:7.1867976,label:10},{x1:4.266693,x2:0.05772239,label:10},{x1:6.103763,x2:0.2061382,label:10},{x1:4.8048987,x2:0,label:10},{x1:9.886054,x2:5.8564053,label:10},{x1:0.50934833,x2:2.9053957,label:10},{x1:2.3884928,x2:0.83952785,label:10},{x1:5.5341177,x2:9.829651,label:10},{x1:2.388731,x2:9.113775,label:10},{x1:8.291733,x2:1.3363142,label:10},{x1:1.9640036,x2:8.939258,label:10},{x1:9.493931,x2:7.01815,label:10},{x1:2.0423875,x2:0.9737987,label:10},{x1:0.37485844,x2:3.4564848,label:10},{x1:7.1699057,x2:9.46011,label:10},{x1:8.861256,x2:8.245877,label:10},{x1:3.645735,x2:9.7154255,label:10},{x1:9.74814,x2:6.3591795,label:10},{x1:9.002591,x2:2.0221906,label:10},{x1:5.6317616,x2:0.1595877,label:10},{x1:7.9866614,x2:8.960461,label:10},{x1:2.0944946,x2:1.0511646,label:10},{x1:3.657294,x2:0.24120656,label:10},{x1:2.6978712,x2:0.5634593,label:10},{x1:0.05346329,x2:5.881465,label:10},{x1:1.1316464,x2:8.032728,label:10},{x1:9.95426,x2:5.0538116,label:10},{x1:2.2714138,x2:0.800496,label:10},{x1:1.2220763,x2:8.187496,label:10},{x1:6.8605647,x2:0.4121502,label:10},{x1:9.798297,x2:6.1023273,label:10},{x1:1.0201107,x2:2.0807052,label:10},{x1:5.808787,x2:9.772753,label:10},{x1:6.191328,x2:9.755719,label:10},{x1:5.1729484,x2:9.93665,label:10},{x1:7.49984,x2:9.232105,label:10},{x1:1.441769,x2:8.566045,label:10},{x1:8.623273,x2:8.365911,label:10},{x1:4.565543,x2:9.863519,label:10},{x1:2.0012963,x2:8.916913,label:10},{x1:9.356578,x2:2.623774,label:10},{x1:8.176522,x2:1.1368941,label:10},{x1:9.868322,x2:5.445537,label:10}],"4":[{x1:4.0238857,x2:1.0025454,label:8},{x1:2.5730195,x2:3.5640106,label:1},{x1:5.985973,x2:5.0323467,label:1},{x1:5.0743985,x2:4.9841146,label:0},{x1:4.969966,x2:5.0315638,label:0},{x1:5.0020294,x2:5.109913,label:0},{x1:4.921217,x2:5.1024876,label:0},{x1:4.943262,x2:4.9450727,label:5},{x1:4.921423,x2:5.029999,label:7},{x1:4.9949994,x2:4.9939504,label:3},{x1:4.9566298,x2:4.9186583,label:5},{x1:5.0280704,x2:4.9878817,label:5},{x1:4.9793706,x2:5.078128,label:1},{x1:5.0345693,x2:5.0340977,label:1},{x1:5.034451,x2:4.937491,label:5},{x1:5.0428348,x2:5.0202417,label:9},{x1:5.0354443,x2:4.958565,label:1},{x1:4.9238825,x2:4.9462905,label:0},{x1:5.0260863,x2:4.890396,label:8},{x1:4.970404,x2:5.072728,label:7},{x1:4.9698176,x2:4.91448,label:5},{x1:5.0165915,x2:5.0703144,label:1},{x1:4.99346,x2:4.951056,label:9},{x1:5.0068183,x2:5.0421424,label:9},{x1:4.961132,x2:4.99246,label:8},{x1:4.950137,x2:4.964626,label:8},{x1:5.0101213,x2:4.9365034,label:8},{x1:4.986503,x2:5.103631,label:7},{x1:4.925618,x2:4.9782953,label:3},{x1:5.044324,x2:5.1003704,label:1},{x1:5.0281224,x2:5.0037746,label:0},{x1:4.9873147,x2:4.923618,label:9},{x1:4.993277,x2:4.9777665,label:9},{x1:5.022042,x2:4.9460764,label:5},{x1:4.9222293,x2:4.999626,label:3},{x1:4.9928102,x2:4.9366894,label:0},{x1:4.96461,x2:4.9544644,label:5},{x1:5.024307,x2:4.975915,label:8},{x1:4.942553,x2:5.001296,label:7},{x1:4.9758406,x2:4.9045177,label:5},{x1:5.0627093,x2:5.080565,label:4},{x1:5.045799,x2:5.066696,label:1},{x1:4.9345202,x2:4.937325,label:0},{x1:5.019631,x2:5.035519,label:9},{x1:4.9152703,x2:5.055007,label:7},{x1:5.090331,x2:5.094959,label:1},{x1:4.9858046,x2:5.041125,label:0},{x1:4.883947,x2:4.9683237,label:3},{x1:4.9326115,x2:5.075505,label:1},{x1:5.1082196,x2:5.010051,label:8},{x1:4.9056077,x2:5.0342135,label:7},{x1:5.0295644,x2:4.981297,label:4},{x1:4.967837,x2:5.0668554,label:4},{x1:4.8944964,x2:5.038494,label:0},{x1:4.95784,x2:5.011743,label:7},{x1:4.9613676,x2:5.0168366,label:7},{x1:5.0592914,x2:4.949244,label:6},{x1:5.0613475,x2:5.0610766,label:2},{x1:5.086,x2:5.062617,label:2},{x1:5.0051517,x2:5.0692744,label:3},{x1:4.915011,x2:5.0481057,label:3},{x1:4.9412694,x2:5.0475965,label:3},{x1:4.9795647,x2:4.8855796,label:5},{x1:4.9803433,x2:4.952815,label:4},{x1:5.015673,x2:4.989367,label:9},{x1:4.93906,x2:5.0003343,label:9},{x1:4.9424906,x2:5.0869117,label:3},{x1:5.06995,x2:4.924972,label:5},{x1:4.9084454,x2:5.0621543,label:3},{x1:4.975113,x2:4.9572787,label:8},{x1:4.939524,x2:5.0963283,label:7},{x1:5.0151215,x2:4.9253893,label:6},{x1:4.8873506,x2:5.025169,label:3},{x1:4.972046,x2:4.9618654,label:2},{x1:4.9224305,x2:4.932069,label:6},{x1:5.0069747,x2:5.05747,label:8},{x1:5.0432577,x2:4.959106,label:6},{x1:4.999109,x2:5.0429654,label:4},{x1:5.022353,x2:5.0186443,label:2},{x1:5.008718,x2:4.9043546,label:6},{x1:5.0149665,x2:5.109521,label:4},{x1:4.8902135,x2:5.019852,label:7},{x1:4.9623995,x2:5.0637517,label:2},{x1:5.0866823,x2:4.9790187,label:9},{x1:4.919269,x2:4.9210105,label:6},{x1:5.035858,x2:4.957706,label:4},{x1:5.0743117,x2:5.0363708,label:2},{x1:5.090505,x2:4.9940815,label:2},{x1:5.0113344,x2:4.902892,label:8},{x1:4.997383,x2:4.9064283,label:9},{x1:5.017212,x2:4.9287343,label:6},{x1:4.936757,x2:4.926679,label:6},{x1:4.924654,x2:4.995019,label:2},{x1:5.0022054,x2:4.859994,label:6},{x1:5.0560236,x2:4.9846964,label:4},{x1:5.0010514,x2:5.0236154,label:4},{x1:5.0455523,x2:4.9577665,label:2},{x1:4.957381,x2:4.9743276,label:6},{x1:5.0818796,x2:4.9630256,label:4},{x1:5.0839887,x2:5.030184,label:2},{x1:0.17185508,x2:4.1812534,label:10},{x1:4.142664,x2:0.14585076,label:10},{x1:9.11608,x2:7.6306148,label:10},{x1:4.552967,x2:0.07418687,label:10},{x1:5.031228,x2:10,label:10},{x1:0.11281484,x2:4.0989027,label:10},{x1:5.9655724,x2:0.246195,label:10},{x1:9.773999,x2:3.7964873,label:10},{x1:0.67153215,x2:7.4471474,label:10},{x1:0.36274716,x2:6.6898894,label:10},{x1:9.193901,x2:2.3453,label:10},{x1:2.961097,x2:9.487203,label:10},{x1:0.29576683,x2:3.650964,label:10},{x1:0.7094731,x2:2.503096,label:10},{x1:0.077677555,x2:5.0040007,label:10},{x1:3.4837232,x2:9.722749,label:10},{x1:5.3230877,x2:0.09721083,label:10},{x1:0.62322915,x2:2.581145,label:10},{x1:0.21906397,x2:3.947635,label:10},{x1:7.3808537,x2:9.380716,label:10},{x1:9.639446,x2:3.2159948,label:10},{x1:0.58632606,x2:7.1452236,label:10},{x1:3.014697,x2:0.4440848,label:10},{x1:1.049806,x2:2.1243634,label:10},{x1:9.776316,x2:3.677181,label:10},{x1:9.081136,x2:7.7157764,label:10},{x1:8.836035,x2:8.221111,label:10},{x1:0.16784155,x2:5.7238297,label:10},{x1:6.998462,x2:0.49659404,label:10},{x1:7.5737143,x2:0.83231807,label:10},{x1:4.508965,x2:9.882044,label:10},{x1:7.527604,x2:0.88057834,label:10},{x1:4.707372,x2:9.97747,label:10},{x1:3.428017,x2:9.666003,label:10},{x1:10,x2:4.85359,label:10},{x1:0.032964226,x2:4.667385,label:10},{x1:8.679375,x2:1.7676159,label:10},{x1:7.0098553,x2:0.50273794,label:10},{x1:2.9884276,x2:9.434984,label:10},{x1:6.3030634,x2:9.78222,label:10},{x1:1.3071626,x2:1.8007735,label:10},{x1:7.1336665,x2:9.389765,label:10},{x1:1.4636902,x2:8.472743,label:10},{x1:6.3832755,x2:0.2509541,label:10},{x1:0.39451918,x2:6.927227,label:10},{x1:9.412301,x2:2.8711052,label:10},{x1:0.15664582,x2:6.0400834,label:10},{x1:8.127779,x2:8.826495,label:10},{x1:3.4652097,x2:0.33327076,label:10},{x1:9.842323,x2:4.48198,label:10},{x1:9.686273,x2:3.1884503,label:10},{x1:9.9291315,x2:4.1561074,label:10},{x1:0.96984863,x2:7.9656396,label:10},{x1:1.3467264,x2:1.6527804,label:10},{x1:0,x2:5.395362,label:10},{x1:9.248395,x2:7.3768435,label:10},{x1:8.66095,x2:1.7216151,label:10},{x1:9.392071,x2:7.1867976,label:10},{x1:4.266693,x2:0.05772239,label:10},{x1:6.103763,x2:0.2061382,label:10},{x1:4.8048987,x2:0,label:10},{x1:9.886054,x2:5.8564053,label:10},{x1:0.50934833,x2:2.9053957,label:10},{x1:2.3884928,x2:0.83952785,label:10},{x1:5.5341177,x2:9.829651,label:10},{x1:2.388731,x2:9.113775,label:10},{x1:8.291733,x2:1.3363142,label:10},{x1:1.9640036,x2:8.939258,label:10},{x1:9.493931,x2:7.01815,label:10},{x1:2.0423875,x2:0.9737987,label:10},{x1:0.37485844,x2:3.4564848,label:10},{x1:7.1699057,x2:9.46011,label:10},{x1:8.861256,x2:8.245877,label:10},{x1:3.645735,x2:9.7154255,label:10},{x1:9.74814,x2:6.3591795,label:10},{x1:9.002591,x2:2.0221906,label:10},{x1:5.6317616,x2:0.1595877,label:10},{x1:7.9866614,x2:8.960461,label:10},{x1:2.0944946,x2:1.0511646,label:10},{x1:3.657294,x2:0.24120656,label:10},{x1:2.6978712,x2:0.5634593,label:10},{x1:0.05346329,x2:5.881465,label:10},{x1:1.1316464,x2:8.032728,label:10},{x1:9.95426,x2:5.0538116,label:10},{x1:2.2714138,x2:0.800496,label:10},{x1:1.2220763,x2:8.187496,label:10},{x1:6.8605647,x2:0.4121502,label:10},{x1:9.798297,x2:6.1023273,label:10},{x1:1.0201107,x2:2.0807052,label:10},{x1:5.808787,x2:9.772753,label:10},{x1:6.191328,x2:9.755719,label:10},{x1:5.1729484,x2:9.93665,label:10},{x1:7.49984,x2:9.232105,label:10},{x1:1.441769,x2:8.566045,label:10},{x1:8.623273,x2:8.365911,label:10},{x1:4.565543,x2:9.863519,label:10},{x1:2.0012963,x2:8.916913,label:10},{x1:9.356578,x2:2.623774,label:10},{x1:8.176522,x2:1.1368941,label:10},{x1:9.868322,x2:5.445537,label:10}]};
+
+    /* src/Scatterplot3.svelte generated by Svelte v3.24.1 */
+
+    const { console: console_1 } = globals;
+    const file$4 = "src/Scatterplot3.svelte";
 
     function get_each_context$4(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[25] = list[i];
+    	child_ctx[27] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1$4(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[28] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_2$4(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[28] = list[i];
+    	return child_ctx;
+    }
+
+    // (95:3) {#each yTicks as tick}
+    function create_each_block_2$4(ctx) {
+    	let g;
+    	let line;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[28] + "";
+    	let t;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "x2", "100%");
+    			attr_dev(line, "class", "svelte-1vbxcn7");
+    			add_location(line, file$4, 96, 5, 2638);
+    			attr_dev(text_1, "y", "-4");
+    			attr_dev(text_1, "class", "svelte-1vbxcn7");
+    			add_location(text_1, file$4, 97, 5, 2667);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[28] + " svelte-1vbxcn7");
+    			attr_dev(g, "transform", g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[28]) - /*margin*/ ctx[7].bottom / 2) + ")");
+    			add_location(g, file$4, 95, 4, 2543);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*yScale*/ 8 && g_transform_value !== (g_transform_value = "translate(0, " + (/*yScale*/ ctx[3](/*tick*/ ctx[28]) - /*margin*/ ctx[7].bottom / 2) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2$4.name,
+    		type: "each",
+    		source: "(95:3) {#each yTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (104:3) {#each xTicks as tick}
+    function create_each_block_1$4(ctx) {
+    	let g;
+    	let line;
+    	let line_y__value;
+    	let line_y__value_1;
+    	let text_1;
+    	let t_value = /*tick*/ ctx[28] + "";
+    	let t;
+    	let text_1_y_value;
+    	let g_class_value;
+    	let g_transform_value;
+
+    	const block = {
+    		c: function create() {
+    			g = svg_element("g");
+    			line = svg_element("line");
+    			text_1 = svg_element("text");
+    			t = text(t_value);
+    			attr_dev(line, "y1", line_y__value = "-" + /*height*/ ctx[1]);
+    			attr_dev(line, "y2", line_y__value_1 = "-" + /*margin*/ ctx[7].bottom);
+    			attr_dev(line, "x1", "0");
+    			attr_dev(line, "x2", "0");
+    			attr_dev(line, "class", "svelte-1vbxcn7");
+    			add_location(line, file$4, 105, 5, 2878);
+    			attr_dev(text_1, "y", text_1_y_value = "-" + (/*margin*/ ctx[7].bottom - 10));
+    			attr_dev(text_1, "class", "svelte-1vbxcn7");
+    			add_location(text_1, file$4, 106, 5, 2948);
+    			attr_dev(g, "class", g_class_value = "tick tick-" + /*tick*/ ctx[28] + " svelte-1vbxcn7");
+    			attr_dev(g, "transform", g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[28]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[7].top / 2) + ")");
+    			add_location(g, file$4, 104, 4, 2778);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, g, anchor);
+    			append_dev(g, line);
+    			append_dev(g, text_1);
+    			append_dev(text_1, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*height*/ 2 && line_y__value !== (line_y__value = "-" + /*height*/ ctx[1])) {
+    				attr_dev(line, "y1", line_y__value);
+    			}
+
+    			if (dirty[0] & /*xScale, height*/ 6 && g_transform_value !== (g_transform_value = "translate(" + /*xScale*/ ctx[2](/*tick*/ ctx[28]) + "," + (/*height*/ ctx[1] + /*margin*/ ctx[7].top / 2) + ")")) {
+    				attr_dev(g, "transform", g_transform_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(g);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$4.name,
+    		type: "each",
+    		source: "(104:3) {#each xTicks as tick}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (112:8) {#each points as d, i}
+    function create_each_block$4(ctx) {
+    	let circle;
+    	let circle_cx_value;
+    	let circle_cy_value;
+    	let circle_fill_value;
+
+    	const block = {
+    		c: function create() {
+    			circle = svg_element("circle");
+    			attr_dev(circle, "class", "circle-line svelte-1vbxcn7");
+    			attr_dev(circle, "r", /*r*/ ctx[5]);
+    			attr_dev(circle, "cx", circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[25].x1));
+    			attr_dev(circle, "cy", circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[25].x2));
+    			attr_dev(circle, "fill", circle_fill_value = /*colorScale*/ ctx[10](/*d*/ ctx[25].label));
+    			add_location(circle, file$4, 112, 12, 3063);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, circle, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*xScale*/ 4 && circle_cx_value !== (circle_cx_value = /*xScale*/ ctx[2](/*d*/ ctx[25].x1))) {
+    				attr_dev(circle, "cx", circle_cx_value);
+    			}
+
+    			if (dirty[0] & /*yScale*/ 8 && circle_cy_value !== (circle_cy_value = /*yScale*/ ctx[3](/*d*/ ctx[25].x2))) {
+    				attr_dev(circle, "cy", circle_cy_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(circle);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$4.name,
+    		type: "each",
+    		source: "(112:8) {#each points as d, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$4(ctx) {
+    	let div;
+    	let svg;
+    	let g0;
+    	let g0_transform_value;
+    	let g1;
+    	let div_resize_listener;
+    	let each_value_2 = /*yTicks*/ ctx[9];
+    	validate_each_argument(each_value_2);
+    	let each_blocks_2 = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks_2[i] = create_each_block_2$4(get_each_context_2$4(ctx, each_value_2, i));
+    	}
+
+    	let each_value_1 = /*xTicks*/ ctx[8];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$4(get_each_context_1$4(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*points*/ ctx[4];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$4(get_each_context$4(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			svg = svg_element("svg");
+    			g0 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			g1 = svg_element("g");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(g0, "class", "axis y-axis");
+    			attr_dev(g0, "transform", g0_transform_value = "translate(0, " + /*margin*/ ctx[7].top + ")");
+    			add_location(g0, file$4, 93, 2, 2450);
+    			attr_dev(g1, "class", "axis x-axis svelte-1vbxcn7");
+    			add_location(g1, file$4, 102, 2, 2724);
+    			attr_dev(svg, "class", "svelte-1vbxcn7");
+    			add_location(svg, file$4, 92, 1, 2442);
+    			attr_dev(div, "class", "chart svelte-1vbxcn7");
+    			add_render_callback(() => /*div_elementresize_handler*/ ctx[12].call(div));
+    			add_location(div, file$4, 91, 0, 2369);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, svg);
+    			append_dev(svg, g0);
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].m(g0, null);
+    			}
+
+    			append_dev(svg, g1);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(g1, null);
+    			}
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(svg, null);
+    			}
+
+    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[12].bind(div));
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*yTicks, yScale, margin*/ 648) {
+    				each_value_2 = /*yTicks*/ ctx[9];
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2$4(ctx, each_value_2, i);
+
+    					if (each_blocks_2[i]) {
+    						each_blocks_2[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_2[i] = create_each_block_2$4(child_ctx);
+    						each_blocks_2[i].c();
+    						each_blocks_2[i].m(g0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_2.length; i += 1) {
+    					each_blocks_2[i].d(1);
+    				}
+
+    				each_blocks_2.length = each_value_2.length;
+    			}
+
+    			if (dirty[0] & /*xTicks, xScale, height, margin*/ 390) {
+    				each_value_1 = /*xTicks*/ ctx[8];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$4(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$4(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(g1, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty[0] & /*r, xScale, points, yScale, colorScale*/ 1084) {
+    				each_value = /*points*/ ctx[4];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$4(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$4(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(svg, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks_2, detaching);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			div_resize_listener();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$4.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    const svgWidth$4 = 600;
+    const svgHeight$4 = 600;
+
+    function translate$4(x, y) {
+    	return "translate(" + x + "," + y + ")";
+    }
+
+    function instance$4($$self, $$props, $$invalidate) {
+    	let $tweenedPoints;
+    	let { globalClicked = false } = $$props;
+    	let member = "0";
+    	let points = data$2[member];
+    	let counter2 = 0;
+    	let flag = true;
+    	let r = 5;
+    	let hs = false;
+    	let targetIndex = -1;
+
+    	const tweenedPoints = tweened(points, {
+    		delay: 0,
+    		duration: 750,
+    		easing: cubicOut
+    	});
+
+    	validate_store(tweenedPoints, "tweenedPoints");
+    	component_subscribe($$self, tweenedPoints, value => $$invalidate(14, $tweenedPoints = value));
+    	const [minX, maxX] = extent($tweenedPoints, d => d.x1);
+    	const [minY, maxY] = extent($tweenedPoints, d => d.x2);
+    	const margin = { top: 30, right: 15, bottom: 30, left: 25 };
+    	let width = svgWidth$4 - margin.left - margin.right;
+    	let height = svgHeight$4 - margin.top - margin.bottom;
+    	const xTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    	const yTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    	const colorDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    	const colorScale = ordinal().domain(extent(colorDomain)).range([
+    		"#4e79a7",
+    		"#f28e2c",
+    		"#e15759",
+    		"#76b7b2",
+    		"#59a14f",
+    		"#edc949",
+    		"#af7aa1",
+    		"#ff9da7",
+    		"#9c755f",
+    		"#bab0ab"
+    	]);
+
+    	function setTween(key) {
+    		tweenedPoints.set(data$2[key]);
+    	}
+
+    	// member = "1";
+    	// points = data[member]
+    	onMount(() => {
+    		
+    	});
+
+    	beforeUpdate(() => {
+    		
+    	});
+
+    	afterUpdate(() => {
+    		console.log(counter2);
+    		counter2 += 1;
+    	}); // if(globalClicked && flag) {
+    	//     flag = false
+    	//     const interval = setInterval(() => {
+    	//         if (counter2 < 10) counter2++;
+
+    	const writable_props = ["globalClicked"];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1.warn(`<Scatterplot3> was created with unknown prop '${key}'`);
+    	});
+
+    	let { $$slots = {}, $$scope } = $$props;
+    	validate_slots("Scatterplot3", $$slots, []);
+
+    	function div_elementresize_handler() {
+    		width = this.clientWidth;
+    		height = this.clientHeight;
+    		$$invalidate(0, width);
+    		$$invalidate(1, height);
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ("globalClicked" in $$props) $$invalidate(11, globalClicked = $$props.globalClicked);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		d3,
+    		easings,
+    		tweened,
+    		onMount,
+    		beforeUpdate,
+    		afterUpdate,
+    		data: data$2,
+    		globalClicked,
+    		translate: translate$4,
+    		member,
+    		points,
+    		counter2,
+    		flag,
+    		r,
+    		hs,
+    		targetIndex,
+    		tweenedPoints,
+    		minX,
+    		maxX,
+    		minY,
+    		maxY,
+    		svgWidth: svgWidth$4,
+    		svgHeight: svgHeight$4,
+    		margin,
+    		width,
+    		height,
+    		xTicks,
+    		yTicks,
+    		colorDomain,
+    		colorScale,
+    		setTween,
+    		$tweenedPoints,
+    		xScale,
+    		yScale
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("globalClicked" in $$props) $$invalidate(11, globalClicked = $$props.globalClicked);
+    		if ("member" in $$props) $$invalidate(15, member = $$props.member);
+    		if ("points" in $$props) $$invalidate(4, points = $$props.points);
+    		if ("counter2" in $$props) counter2 = $$props.counter2;
+    		if ("flag" in $$props) flag = $$props.flag;
+    		if ("r" in $$props) $$invalidate(5, r = $$props.r);
+    		if ("hs" in $$props) hs = $$props.hs;
+    		if ("targetIndex" in $$props) targetIndex = $$props.targetIndex;
+    		if ("width" in $$props) $$invalidate(0, width = $$props.width);
+    		if ("height" in $$props) $$invalidate(1, height = $$props.height);
+    		if ("xScale" in $$props) $$invalidate(2, xScale = $$props.xScale);
+    		if ("yScale" in $$props) $$invalidate(3, yScale = $$props.yScale);
+    	};
+
+    	let xScale;
+    	let yScale;
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty[0] & /*width*/ 1) {
+    			 $$invalidate(2, xScale = linear$2().domain([minX, maxX]).range([margin.left, width - margin.right]));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*height*/ 2) {
+    			 $$invalidate(3, yScale = linear$2().domain([minY, maxY]).range([height - margin.bottom, margin.top]));
+    		}
+    	};
+
+    	 setTween(member);
+
+    	return [
+    		width,
+    		height,
+    		xScale,
+    		yScale,
+    		points,
+    		r,
+    		tweenedPoints,
+    		margin,
+    		xTicks,
+    		yTicks,
+    		colorScale,
+    		globalClicked,
+    		div_elementresize_handler
+    	];
+    }
+
+    class Scatterplot3 extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { globalClicked: 11 }, [-1, -1]);
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Scatterplot3",
+    			options,
+    			id: create_fragment$4.name
+    		});
+    	}
+
+    	get globalClicked() {
+    		throw new Error("<Scatterplot3>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set globalClicked(value) {
+    		throw new Error("<Scatterplot3>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/App.svelte generated by Svelte v3.24.1 */
+
+    const { Object: Object_1, console: console_1$1 } = globals;
+    const file$5 = "src/App.svelte";
+
+    function get_each_context$5(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[33] = list[i];
     	return child_ctx;
     }
 
-    // (238:4) {:else}
+    // (239:4) {:else}
     function create_else_block_2(ctx) {
     	let button;
     	let h3;
@@ -22666,9 +23547,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for GLOBAL optimization (Click for RUN 🟢)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$4, 239, 6, 4295);
+    			add_location(h3, file$5, 240, 6, 4346);
     			attr_dev(button, "class", "button1 svelte-1b8xkh4");
-    			add_location(button, file$4, 238, 5, 4235);
+    			add_location(button, file$5, 239, 5, 4286);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -22691,14 +23572,14 @@ var app = (function () {
     		block,
     		id: create_else_block_2.name,
     		type: "else",
-    		source: "(238:4) {:else}",
+    		source: "(239:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (232:4) {#if globalClicked}
+    // (233:4) {#if globalClicked}
     function create_if_block_3(ctx) {
     	let button;
     	let h3;
@@ -22711,9 +23592,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for GLOBAL optimization (Click for STOP 🟥)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$4, 233, 6, 4112);
+    			add_location(h3, file$5, 234, 6, 4163);
     			attr_dev(button, "class", "button2 svelte-1b8xkh4");
-    			add_location(button, file$4, 232, 5, 4052);
+    			add_location(button, file$5, 233, 5, 4103);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -22736,14 +23617,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(232:4) {#if globalClicked}",
+    		source: "(233:4) {#if globalClicked}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (329:4) {:else}
+    // (330:4) {:else}
     function create_else_block_1(ctx) {
     	let button;
     	let h3;
@@ -22756,9 +23637,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for LOCAL optimization (Click for RUN 🟢)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$4, 330, 6, 6544);
+    			add_location(h3, file$5, 331, 6, 6595);
     			attr_dev(button, "class", "button1 svelte-1b8xkh4");
-    			add_location(button, file$4, 329, 5, 6485);
+    			add_location(button, file$5, 330, 5, 6536);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -22781,14 +23662,14 @@ var app = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(329:4) {:else}",
+    		source: "(330:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (319:4) {#if localClicked}
+    // (320:4) {#if localClicked}
     function create_if_block_2(ctx) {
     	let button;
     	let h3;
@@ -22801,9 +23682,9 @@ var app = (function () {
     			h3 = element("h3");
     			h3.textContent = "Hyperparameter setting for LOCAL optimization (Click for STOP 🟥)";
     			attr_dev(h3, "class", "svelte-1b8xkh4");
-    			add_location(h3, file$4, 320, 6, 6264);
+    			add_location(h3, file$5, 321, 6, 6315);
     			attr_dev(button, "class", "button2 svelte-1b8xkh4");
-    			add_location(button, file$4, 319, 5, 6198);
+    			add_location(button, file$5, 320, 5, 6249);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -22826,14 +23707,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(319:4) {#if localClicked}",
+    		source: "(320:4) {#if localClicked}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (461:3) {#if showItems}
+    // (462:3) {#if showItems}
     function create_if_block$2(ctx) {
     	let each_1_anchor;
     	let current;
@@ -22842,7 +23723,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$4(get_each_context$4(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$5(get_each_context$5(ctx, each_value, i));
     	}
 
     	const out = i => transition_out(each_blocks[i], 1, 1, () => {
@@ -22872,13 +23753,13 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$4(ctx, each_value, i);
+    					const child_ctx = get_each_context$5(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     						transition_in(each_blocks[i], 1);
     					} else {
-    						each_blocks[i] = create_each_block$4(child_ctx);
+    						each_blocks[i] = create_each_block$5(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
@@ -22922,14 +23803,14 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(461:3) {#if showItems}",
+    		source: "(462:3) {#if showItems}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (468:5) {:else}
+    // (469:5) {:else}
     function create_else_block$2(ctx) {
     	let div;
     	let t0_value = /*items*/ ctx[12].indexOf(/*item*/ ctx[33]) + "";
@@ -22989,7 +23870,7 @@ var app = (function () {
     			t18 = text(t18_value);
     			t19 = space();
     			attr_dev(div, "class", "snapshot svelte-1b8xkh4");
-    			add_location(div, file$4, 468, 6, 9888);
+    			add_location(div, file$5, 469, 6, 9939);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -23052,14 +23933,14 @@ var app = (function () {
     		block,
     		id: create_else_block$2.name,
     		type: "else",
-    		source: "(468:5) {:else}",
+    		source: "(469:5) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (463:5) {#if item.type == "global"}
+    // (464:5) {#if item.type == "global"}
     function create_if_block_1$2(ctx) {
     	let div;
     	let t0_value = /*items*/ ctx[12].indexOf(/*item*/ ctx[33]) + "";
@@ -23099,7 +23980,7 @@ var app = (function () {
     			t10 = text(t10_value);
     			t11 = space();
     			attr_dev(div, "class", "snapshot svelte-1b8xkh4");
-    			add_location(div, file$4, 463, 6, 9665);
+    			add_location(div, file$5, 464, 6, 9716);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -23150,15 +24031,15 @@ var app = (function () {
     		block,
     		id: create_if_block_1$2.name,
     		type: "if",
-    		source: "(463:5) {#if item.type == \\\"global\\\"}",
+    		source: "(464:5) {#if item.type == \\\"global\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (462:4) {#each items.slice(0, i) as item}
-    function create_each_block$4(ctx) {
+    // (463:4) {#each items.slice(0, i) as item}
+    function create_each_block$5(ctx) {
     	let current_block_type_index;
     	let if_block;
     	let if_block_anchor;
@@ -23226,16 +24107,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$4.name,
+    		id: create_each_block$5.name,
     		type: "each",
-    		source: "(462:4) {#each items.slice(0, i) as item}",
+    		source: "(463:4) {#each items.slice(0, i) as item}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$4(ctx) {
+    function create_fragment$5(ctx) {
     	let div60;
     	let h1;
     	let t1;
@@ -23415,6 +24296,8 @@ var app = (function () {
     	let a0;
     	let t88;
     	let a1;
+    	let t90;
+    	let scatterplot3;
     	let current;
     	let mounted;
     	let dispose;
@@ -23457,6 +24340,11 @@ var app = (function () {
     		});
 
     	let if_block2 = /*showItems*/ ctx[10] && create_if_block$2(ctx);
+
+    	scatterplot3 = new Scatterplot3({
+    			props: { globalClicked: /*globalClicked*/ ctx[4] },
+    			$$inline: true
+    		});
 
     	const block = {
     		c: function create() {
@@ -23660,222 +24548,224 @@ var app = (function () {
     			t88 = text(" / ");
     			a1 = element("a");
     			a1.textContent = "hyungkwonko.info";
+    			t90 = space();
+    			create_component(scatterplot3.$$.fragment);
     			attr_dev(h1, "class", "svelte-1b8xkh4");
-    			add_location(h1, file$4, 223, 1, 3917);
+    			add_location(h1, file$5, 224, 1, 3968);
     			attr_dev(div0, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div0, file$4, 230, 3, 3999);
-    			add_location(b0, file$4, 247, 5, 4485);
-    			add_location(br0, file$4, 248, 5, 4510);
+    			add_location(div0, file$5, 231, 3, 4050);
+    			add_location(b0, file$5, 248, 5, 4536);
+    			add_location(br0, file$5, 249, 5, 4561);
     			attr_dev(div1, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div1, file$4, 246, 4, 4445);
+    			add_location(div1, file$5, 247, 4, 4496);
     			attr_dev(div2, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div2, file$4, 251, 4, 4570);
+    			add_location(div2, file$5, 252, 4, 4621);
     			attr_dev(input0, "type", "range");
     			attr_dev(input0, "min", "0.0");
     			attr_dev(input0, "max", "1.0");
     			attr_dev(input0, "step", "0.005");
     			attr_dev(input0, "class", "svelte-1b8xkh4");
-    			add_location(input0, file$4, 255, 5, 4679);
+    			add_location(input0, file$5, 256, 5, 4730);
     			attr_dev(div3, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div3, file$4, 254, 4, 4639);
+    			add_location(div3, file$5, 255, 4, 4690);
     			attr_dev(div4, "class", "row svelte-1b8xkh4");
-    			add_location(div4, file$4, 245, 3, 4423);
-    			add_location(b1, file$4, 260, 5, 4836);
-    			add_location(br1, file$4, 261, 5, 4868);
+    			add_location(div4, file$5, 246, 3, 4474);
+    			add_location(b1, file$5, 261, 5, 4887);
+    			add_location(br1, file$5, 262, 5, 4919);
     			attr_dev(div5, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div5, file$4, 259, 4, 4796);
+    			add_location(div5, file$5, 260, 4, 4847);
     			attr_dev(div6, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div6, file$4, 264, 4, 4925);
+    			add_location(div6, file$5, 265, 4, 4976);
     			attr_dev(input1, "type", "range");
     			attr_dev(input1, "min", "100");
     			attr_dev(input1, "max", "500");
     			attr_dev(input1, "step", "50");
     			attr_dev(input1, "class", "svelte-1b8xkh4");
-    			add_location(input1, file$4, 268, 5, 5029);
+    			add_location(input1, file$5, 269, 5, 5080);
     			attr_dev(div7, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div7, file$4, 267, 4, 4989);
+    			add_location(div7, file$5, 268, 4, 5040);
     			attr_dev(div8, "class", "row svelte-1b8xkh4");
-    			add_location(div8, file$4, 258, 3, 4774);
-    			add_location(b2, file$4, 273, 5, 5178);
-    			add_location(br2, file$4, 274, 5, 5211);
+    			add_location(div8, file$5, 259, 3, 4825);
+    			add_location(b2, file$5, 274, 5, 5229);
+    			add_location(br2, file$5, 275, 5, 5262);
     			attr_dev(div9, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div9, file$4, 272, 4, 5138);
+    			add_location(div9, file$5, 273, 4, 5189);
     			attr_dev(div10, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div10, file$4, 277, 4, 5264);
+    			add_location(div10, file$5, 278, 4, 5315);
     			attr_dev(input2, "type", "range");
     			attr_dev(input2, "min", "5");
     			attr_dev(input2, "max", "30");
     			attr_dev(input2, "step", "5");
     			attr_dev(input2, "class", "svelte-1b8xkh4");
-    			add_location(input2, file$4, 281, 5, 5366);
+    			add_location(input2, file$5, 282, 5, 5417);
     			attr_dev(div11, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div11, file$4, 280, 4, 5326);
+    			add_location(div11, file$5, 281, 4, 5377);
     			attr_dev(div12, "class", "row svelte-1b8xkh4");
-    			add_location(div12, file$4, 271, 3, 5116);
-    			add_location(b3, file$4, 286, 5, 5509);
+    			add_location(div12, file$5, 272, 3, 5167);
+    			add_location(b3, file$5, 287, 5, 5560);
     			attr_dev(div13, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div13, file$4, 285, 4, 5469);
+    			add_location(div13, file$5, 286, 4, 5520);
     			attr_dev(div14, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div14, file$4, 288, 4, 5543);
+    			add_location(div14, file$5, 289, 4, 5594);
     			attr_dev(input3, "type", "radio");
     			input3.__value = input3_value_value = "PCA";
     			input3.value = input3.__value;
     			attr_dev(input3, "class", "svelte-1b8xkh4");
     			/*$$binding_groups*/ ctx[25][0].push(input3);
-    			add_location(input3, file$4, 293, 6, 5660);
-    			add_location(label0, file$4, 292, 5, 5646);
+    			add_location(input3, file$5, 294, 6, 5711);
+    			add_location(label0, file$5, 293, 5, 5697);
     			attr_dev(input4, "type", "radio");
     			input4.__value = input4_value_value = "Random";
     			input4.value = input4.__value;
     			attr_dev(input4, "class", "svelte-1b8xkh4");
     			/*$$binding_groups*/ ctx[25][0].push(input4);
-    			add_location(input4, file$4, 298, 6, 5763);
-    			add_location(label1, file$4, 297, 5, 5749);
+    			add_location(input4, file$5, 299, 6, 5814);
+    			add_location(label1, file$5, 298, 5, 5800);
     			attr_dev(div15, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div15, file$4, 291, 4, 5606);
+    			add_location(div15, file$5, 292, 4, 5657);
     			attr_dev(div16, "class", "row svelte-1b8xkh4");
-    			add_location(div16, file$4, 284, 3, 5447);
+    			add_location(div16, file$5, 285, 3, 5498);
     			attr_dev(button0, "class", "svelte-1b8xkh4");
-    			add_location(button0, file$4, 306, 4, 5908);
+    			add_location(button0, file$5, 307, 4, 5959);
     			attr_dev(button1, "class", "svelte-1b8xkh4");
-    			add_location(button1, file$4, 309, 4, 5984);
+    			add_location(button1, file$5, 310, 4, 6035);
     			attr_dev(div17, "class", "sub-footer svelte-1b8xkh4");
-    			add_location(div17, file$4, 305, 3, 5879);
+    			add_location(div17, file$5, 306, 3, 5930);
     			attr_dev(div18, "class", "column svelte-1b8xkh4");
-    			add_location(div18, file$4, 229, 2, 3975);
+    			add_location(div18, file$5, 230, 2, 4026);
     			attr_dev(div19, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div19, file$4, 317, 3, 6146);
-    			add_location(b4, file$4, 338, 5, 6733);
-    			add_location(br3, file$4, 339, 5, 6757);
+    			add_location(div19, file$5, 318, 3, 6197);
+    			add_location(b4, file$5, 339, 5, 6784);
+    			add_location(br3, file$5, 340, 5, 6808);
     			attr_dev(div20, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div20, file$4, 337, 4, 6693);
+    			add_location(div20, file$5, 338, 4, 6744);
     			attr_dev(div21, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div21, file$4, 342, 4, 6817);
+    			add_location(div21, file$5, 343, 4, 6868);
     			attr_dev(input5, "type", "range");
     			attr_dev(input5, "min", "0.0");
     			attr_dev(input5, "max", "1.0");
     			attr_dev(input5, "step", "0.005");
     			attr_dev(input5, "class", "svelte-1b8xkh4");
-    			add_location(input5, file$4, 346, 5, 6925);
+    			add_location(input5, file$5, 347, 5, 6976);
     			attr_dev(div22, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div22, file$4, 345, 4, 6885);
+    			add_location(div22, file$5, 346, 4, 6936);
     			attr_dev(div23, "class", "row svelte-1b8xkh4");
-    			add_location(div23, file$4, 336, 3, 6671);
-    			add_location(b5, file$4, 351, 5, 7081);
-    			add_location(br4, file$4, 352, 5, 7116);
+    			add_location(div23, file$5, 337, 3, 6722);
+    			add_location(b5, file$5, 352, 5, 7132);
+    			add_location(br4, file$5, 353, 5, 7167);
     			attr_dev(div24, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div24, file$4, 350, 4, 7041);
+    			add_location(div24, file$5, 351, 4, 7092);
     			attr_dev(div25, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div25, file$4, 355, 4, 7169);
+    			add_location(div25, file$5, 356, 4, 7220);
     			attr_dev(input6, "type", "range");
     			attr_dev(input6, "min", "1");
     			attr_dev(input6, "max", "50");
     			attr_dev(input6, "step", "1");
     			attr_dev(input6, "class", "svelte-1b8xkh4");
-    			add_location(input6, file$4, 359, 5, 7274);
+    			add_location(input6, file$5, 360, 5, 7325);
     			attr_dev(div26, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div26, file$4, 358, 4, 7234);
+    			add_location(div26, file$5, 359, 4, 7285);
     			attr_dev(div27, "class", "row svelte-1b8xkh4");
-    			add_location(div27, file$4, 349, 3, 7019);
-    			add_location(b6, file$4, 364, 5, 7420);
-    			add_location(br5, file$4, 365, 5, 7453);
+    			add_location(div27, file$5, 350, 3, 7070);
+    			add_location(b6, file$5, 365, 5, 7471);
+    			add_location(br5, file$5, 366, 5, 7504);
     			attr_dev(div28, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div28, file$4, 363, 4, 7380);
+    			add_location(div28, file$5, 364, 4, 7431);
     			attr_dev(div29, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div29, file$4, 368, 4, 7509);
+    			add_location(div29, file$5, 369, 4, 7560);
     			attr_dev(input7, "type", "range");
     			attr_dev(input7, "min", "50");
     			attr_dev(input7, "max", "200");
     			attr_dev(input7, "step", "10");
     			attr_dev(input7, "class", "svelte-1b8xkh4");
-    			add_location(input7, file$4, 372, 5, 7614);
+    			add_location(input7, file$5, 373, 5, 7665);
     			attr_dev(div30, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div30, file$4, 371, 4, 7574);
+    			add_location(div30, file$5, 372, 4, 7625);
     			attr_dev(div31, "class", "row svelte-1b8xkh4");
-    			add_location(div31, file$4, 362, 3, 7358);
-    			add_location(b7, file$4, 377, 5, 7763);
-    			add_location(br6, file$4, 378, 5, 7805);
+    			add_location(div31, file$5, 363, 3, 7409);
+    			add_location(b7, file$5, 378, 5, 7814);
+    			add_location(br6, file$5, 379, 5, 7856);
     			attr_dev(div32, "class", "column column-width1 svelte-1b8xkh4");
-    			add_location(div32, file$4, 376, 4, 7723);
+    			add_location(div32, file$5, 377, 4, 7774);
     			attr_dev(div33, "class", "column column-width2 svelte-1b8xkh4");
-    			add_location(div33, file$4, 381, 4, 7862);
+    			add_location(div33, file$5, 382, 4, 7913);
     			attr_dev(input8, "type", "range");
     			attr_dev(input8, "min", "0");
     			attr_dev(input8, "max", "1");
     			attr_dev(input8, "step", "0.01");
     			attr_dev(input8, "class", "svelte-1b8xkh4");
-    			add_location(input8, file$4, 385, 5, 7972);
+    			add_location(input8, file$5, 386, 5, 8023);
     			attr_dev(div34, "class", "column column-width3 svelte-1b8xkh4");
-    			add_location(div34, file$4, 384, 4, 7932);
+    			add_location(div34, file$5, 385, 4, 7983);
     			attr_dev(div35, "class", "row svelte-1b8xkh4");
-    			add_location(div35, file$4, 375, 3, 7701);
+    			add_location(div35, file$5, 376, 3, 7752);
     			attr_dev(button2, "class", "svelte-1b8xkh4");
-    			add_location(button2, file$4, 390, 4, 8094);
+    			add_location(button2, file$5, 391, 4, 8145);
     			attr_dev(div36, "class", "sub-footer svelte-1b8xkh4");
-    			add_location(div36, file$4, 389, 3, 8065);
+    			add_location(div36, file$5, 390, 3, 8116);
     			attr_dev(div37, "class", "column svelte-1b8xkh4");
-    			add_location(div37, file$4, 316, 2, 6122);
-    			add_location(div38, file$4, 227, 1, 3949);
+    			add_location(div37, file$5, 317, 2, 6173);
+    			add_location(div38, file$5, 228, 1, 4000);
     			attr_dev(h30, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h30, file$4, 401, 4, 8278);
+    			add_location(h30, file$5, 402, 4, 8329);
     			attr_dev(div39, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div39, file$4, 400, 3, 8250);
+    			add_location(div39, file$5, 401, 3, 8301);
     			attr_dev(div40, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div40, file$4, 406, 4, 8382);
+    			add_location(div40, file$5, 407, 4, 8433);
     			attr_dev(div41, "class", "row svelte-1b8xkh4");
-    			add_location(div41, file$4, 405, 3, 8360);
+    			add_location(div41, file$5, 406, 3, 8411);
     			attr_dev(div42, "class", "column svelte-1b8xkh4");
-    			add_location(div42, file$4, 399, 2, 8226);
+    			add_location(div42, file$5, 400, 2, 8277);
     			attr_dev(h31, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h31, file$4, 413, 4, 8560);
+    			add_location(h31, file$5, 414, 4, 8611);
     			attr_dev(div43, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div43, file$4, 412, 3, 8532);
+    			add_location(div43, file$5, 413, 3, 8583);
     			attr_dev(div44, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div44, file$4, 418, 4, 8663);
+    			add_location(div44, file$5, 419, 4, 8714);
     			attr_dev(div45, "class", "row svelte-1b8xkh4");
-    			add_location(div45, file$4, 417, 3, 8641);
+    			add_location(div45, file$5, 418, 3, 8692);
     			attr_dev(div46, "class", "column svelte-1b8xkh4");
-    			add_location(div46, file$4, 411, 2, 8508);
-    			add_location(div47, file$4, 398, 1, 8218);
+    			add_location(div46, file$5, 412, 2, 8559);
+    			add_location(div47, file$5, 399, 1, 8269);
     			attr_dev(h32, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h32, file$4, 429, 4, 8863);
+    			add_location(h32, file$5, 430, 4, 8914);
     			attr_dev(div48, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div48, file$4, 428, 3, 8835);
+    			add_location(div48, file$5, 429, 3, 8886);
     			attr_dev(div49, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div49, file$4, 434, 4, 8979);
+    			add_location(div49, file$5, 435, 4, 9030);
     			attr_dev(div50, "class", "row svelte-1b8xkh4");
-    			add_location(div50, file$4, 433, 3, 8957);
+    			add_location(div50, file$5, 434, 3, 9008);
     			attr_dev(div51, "class", "column svelte-1b8xkh4");
-    			add_location(div51, file$4, 427, 2, 8811);
+    			add_location(div51, file$5, 428, 2, 8862);
     			attr_dev(h33, "class", "sub-title-h3 svelte-1b8xkh4");
-    			add_location(h33, file$4, 441, 4, 9153);
+    			add_location(h33, file$5, 442, 4, 9204);
     			attr_dev(div52, "class", "sub-title svelte-1b8xkh4");
-    			add_location(div52, file$4, 440, 3, 9125);
+    			add_location(div52, file$5, 441, 3, 9176);
     			attr_dev(div53, "class", "column column-d3 svelte-1b8xkh4");
-    			add_location(div53, file$4, 446, 4, 9268);
+    			add_location(div53, file$5, 447, 4, 9319);
     			attr_dev(div54, "class", "row svelte-1b8xkh4");
-    			add_location(div54, file$4, 445, 3, 9246);
+    			add_location(div54, file$5, 446, 3, 9297);
     			attr_dev(div55, "class", "column svelte-1b8xkh4");
-    			add_location(div55, file$4, 439, 2, 9101);
-    			add_location(div56, file$4, 426, 1, 8803);
+    			add_location(div55, file$5, 440, 2, 9152);
+    			add_location(div56, file$5, 427, 1, 8854);
     			attr_dev(input9, "type", "checkbox");
     			attr_dev(input9, "class", "svelte-1b8xkh4");
-    			add_location(input9, file$4, 457, 4, 9489);
-    			add_location(label2, file$4, 456, 3, 9477);
+    			add_location(input9, file$5, 458, 4, 9540);
+    			add_location(label2, file$5, 457, 3, 9528);
     			attr_dev(div57, "class", "column column-snapshot svelte-1b8xkh4");
-    			add_location(div57, file$4, 455, 2, 9437);
+    			add_location(div57, file$5, 456, 2, 9488);
     			attr_dev(div58, "class", "row svelte-1b8xkh4");
-    			add_location(div58, file$4, 454, 1, 9417);
+    			add_location(div58, file$5, 455, 1, 9468);
     			attr_dev(div59, "id", "my_dataviz");
-    			add_location(div59, file$4, 479, 1, 10264);
-    			add_location(br7, file$4, 483, 2, 10355);
+    			add_location(div59, file$5, 480, 1, 10315);
+    			add_location(br7, file$5, 484, 2, 10406);
     			attr_dev(a0, "href", "mailto:hkko@hcil.snu.ac.kr");
-    			add_location(a0, file$4, 484, 2, 10362);
+    			add_location(a0, file$5, 485, 2, 10413);
     			attr_dev(a1, "href", "https://hyungkwonko.info");
-    			add_location(a1, file$4, 484, 65, 10425);
+    			add_location(a1, file$5, 485, 65, 10476);
     			attr_dev(footer, "class", "copyright svelte-1b8xkh4");
-    			add_location(footer, file$4, 481, 1, 10295);
-    			add_location(div60, file$4, 222, 0, 3910);
+    			add_location(footer, file$5, 482, 1, 10346);
+    			add_location(div60, file$5, 223, 0, 3961);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24081,6 +24971,8 @@ var app = (function () {
     			append_dev(footer, a0);
     			append_dev(footer, t88);
     			append_dev(footer, a1);
+    			append_dev(div60, t90);
+    			mount_component(scatterplot3, div60, null);
     			current = true;
 
     			if (!mounted) {
@@ -24235,6 +25127,10 @@ var app = (function () {
 
     				check_outros();
     			}
+
+    			const scatterplot3_changes = {};
+    			if (dirty[0] & /*globalClicked*/ 16) scatterplot3_changes.globalClicked = /*globalClicked*/ ctx[4];
+    			scatterplot3.$set(scatterplot3_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -24245,6 +25141,7 @@ var app = (function () {
     			transition_in(linechart.$$.fragment, local);
     			transition_in(linechart2.$$.fragment, local);
     			transition_in(if_block2);
+    			transition_in(scatterplot3.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
@@ -24255,6 +25152,7 @@ var app = (function () {
     			transition_out(linechart.$$.fragment, local);
     			transition_out(linechart2.$$.fragment, local);
     			transition_out(if_block2);
+    			transition_out(scatterplot3.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -24270,6 +25168,7 @@ var app = (function () {
     			destroy_component(linechart);
     			destroy_component(linechart2);
     			if (if_block2) if_block2.d();
+    			destroy_component(scatterplot3);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -24277,7 +25176,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$4.name,
+    		id: create_fragment$5.name,
     		type: "component",
     		source: "",
     		ctx
@@ -24306,7 +25205,7 @@ var app = (function () {
     	return false;
     }
 
-    function instance$4($$self, $$props, $$invalidate) {
+    function instance$5($$self, $$props, $$invalidate) {
     	beforeUpdate(() => {
     		
     	});
@@ -24397,7 +25296,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object_1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
     	let { $$slots = {}, $$scope } = $$props;
@@ -24464,6 +25363,7 @@ var app = (function () {
     		Linechart2,
     		Scatterplot,
     		Scatterplot2,
+    		Scatterplot3,
     		beforeUpdate,
     		afterUpdate,
     		onMount,
@@ -24550,13 +25450,13 @@ var app = (function () {
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {}, [-1, -1]);
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {}, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "App",
     			options,
-    			id: create_fragment$4.name
+    			id: create_fragment$5.name
     		});
     	}
     }

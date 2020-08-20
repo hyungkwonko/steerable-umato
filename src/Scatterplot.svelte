@@ -19,9 +19,7 @@
         return csvData
     }
 
-    let data = read_csv("umato-small_0.csv")
-
-    let el;
+    let data = read_csv("umato-small.csv")
 
     let r = 5;
     let hs = false;
@@ -60,9 +58,6 @@
         .domain(d3.extent(colorDomain))
         .range(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]);
 
-	$: minX = d3.min(data, d => d.iter);
-    $: maxX = d3.max(data, d => d.iter);
-    
 </script>
 
 <div class="chart" bind:clientWidth={width} bind:clientHeight={height}>
