@@ -7,9 +7,7 @@
 	import Linechart2 from "./Linechart2.svelte";
 	import Scatterplot from "./Scatterplot.svelte";
 	import Scatterplot2 from "./Scatterplot2.svelte";
-	import Scatterplot3 from './Scatterplot3.svelte';
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
-
 
 	beforeUpdate(() => {
 	});
@@ -485,8 +483,6 @@
 		<br>
 		<a href="mailto:hkko@hcil.snu.ac.kr">hkko@hcil.snu.ac.kr</a> / <a href="https://hyungkwonko.info">hyungkwonko.info</a>
 	</footer>
-
-	<Scatterplot3 globalClicked={globalClicked}></Scatterplot3>
 
 </div>
 
