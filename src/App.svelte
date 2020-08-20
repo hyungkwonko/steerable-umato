@@ -416,7 +416,7 @@
 			</div>
 			<div class="row">
 				<div class="column column-d3">
-					<Scatterplot2></Scatterplot2>
+					<Scatterplot2 localClicked={localClicked}></Scatterplot2>
 				</div>
 			</div>
 		</div>

@@ -12,8 +12,8 @@
 - ~~mouseout 처리하기~~
 - ~~시간별로 출력하기~~
 - ~~axis label & legend 넣기~~
-6. d3 Scatterplots
-- 시간별로 출력하기
+6. ~~d3 Scatterplots~~
+- ~~시간별로 출력하기~~
 7. run이랑 연동 (3 & 5,6)
 
 ## how to publish on github

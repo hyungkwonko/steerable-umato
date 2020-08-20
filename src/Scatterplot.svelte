@@ -11,9 +11,8 @@
 
     export let globalClicked = false;
     let counter = 0;
-    let flag = true;
-    let tmpData;
 	let maxlen = 10
+    let flag = true;
 
     function translate(x, y) {
         return 'translate(' + x + ',' + y + ')'
